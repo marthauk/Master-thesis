@@ -2,3 +2,36 @@
 %\section{Background Theory}
 \chapter{Background Theory}
 \label{sec:theory}
+
+\section{Anomaly detection}
+
+\subsection{Background compression}
+% See book
+
+\subsection{Causality}
+
+\section{RX algorithm}
+
+\subsection{Global}
+
+\subsection{Local}
+
+\section{Adaptive Causal Anomlay Detection(ACAD)}
+Problem RX; If an earlier detected anomaly has a strong signature, it may have significant impact on detection of subsqeunt detected anomalies later. Solves by removing anomalies detected from the set R when calculating the correlation matrix.\\
+Another issue arising in K-AD(RXD) is that the size of anomaloies to be detected cannot be too large. HOw large can the size be to be considered an anomaly? - Obviously, a data sample vector that can be identified visually generally should not be considered as an anomaly. Beta; rate of image size to the size of an anomaly. Empirically \approx 100\\
+
+Third issue ; how close is too close for two anomalies to be detected as two separate anomalies?
+\\
+Fourth issue; How to distinguish two detected anomalies from one another.
+\\ 
+Benefits ACAD: \\
+- ACAD builds and updates an anomaly library and generates an anomaly map to provide spatial coordinates of all its detected anomalies in the original image. This anomaly map can also be used to classify all the detected anomalies. \\
+- ACAD can be considered to be real time, even though the data processing may take time. Once the processing of data is completed, the whole process of anomaly dettection is also completed at nearly the same time. 
+\\
+This implies that the performance of ACAD is not determined by the relative size of the entire image to the anomaly, but rather by the number of data sample vectors considered in $n_{acad}$.
+
+\\ Question
+\\ Causality; in causality, will the first pixel-vector processed have a high probability of being detected as a anomality?\\
+-Yes, might be an issue. Remedied by the ACAD according to the book.
+
+%Note to self; include comparison here of the different Anomalies Detector
