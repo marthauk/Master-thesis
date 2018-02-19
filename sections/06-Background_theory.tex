@@ -4,7 +4,8 @@
 \label{sec:theory}
 
 \section{Anomaly detection}
-The process of detecting anomalies in a hyperspectral image is called anomaly detection. For a spectral vector to be considered as an anomaly, it has to be significantly different to its neighboring background. Four issues arising in anomaly detection \cite{chang2006characterization} is:
+\label{sec:anomaly_detectors_theory}
+The process of detecting anomalies in a hyperspectral image is called anomaly detection. For a spectral vector to be considered as an anomaly, it has to be significantly different to its neighboring background. Four issues arising in anomaly detection is \cite{chang2006characterization}:
 \\
  
 \begin{itemize}
@@ -77,11 +78,11 @@ ACAD can then be defined as in equation \ref{eq:ACAD}.
 
 ACAD is a causal filter, meaning that only the pixels previosly processed are used for anomaly detection.  It computes the correlation matrix for the previously captured pixel sample vector {$\textbf{x}_1$, ....$\textbf{x}_k$} up to the pixel currently being processed, $k$, as shown in equation \ref{eq:caus_corr}. This means that ACAD might be implemented in real-time and near-real time, seeing as pixels can be processed as soon as they are captured by the push-broom HSI and the AD does not need to wait for the entire image to be loaded into memory. \\
 
-An anomalous pixel vector have a significant spectral vector difference from its surroundings. Since ACAD is causal, the surroundings is defined as the $n_{acad}$ previously processed pixels. %To evaluate if a spectral vector is anomalous,
+An anomalous pixel vector have a significant spectral vector difference from its surroundings. Since ACAD is causal, the surroundings is defined as the $n_{ACAD}$ previously processed pixels. %To evaluate if a spectral vector is anomalous,
 ACAD defines the variable $u_k$, shown in equation \ref{eq:u_k}. $u_k$ is used to be able to evaluate if a pixel vector is anomalous. 
 
 \begin{equation}
-    u_k = \frac{1}{n_{acad}}\sum_{i-1}^{n_{acad}}  \delta^{ACAD}(\textbf{x}_{k-i})
+    u_k = \frac{1}{n_{acad}}\sum_{i-1}^{n_{ACAD}}  \delta^{ACAD}(\textbf{x}_{k-i})
     \label{eq:u_k}
 \end{equation}
 
@@ -93,19 +94,30 @@ In order to classify if a pixel vector is anomalous or not, the variable $t_k$ i
 \end{equation}
 
 
-The four issues labelled Q1, Q2, Q3 and Q4 still remains. 
+The four issues labelled Q1, Q2, Q3 and Q4 still remains. For a pixel vector to be considered anomaly it has to be relatively small compared to the size of the image. The relationship between the size of an anomaly and the size of the entire image is $\beta$, shown in equation \ref{eq:beta}.
 
-\subsenction{Q1 ACAD}
+\begin{equation}
+    \beta  = \frac{Image\_size}{size\_of\_anomaly}
+    \label{eq:beta}
+\end{equation}
+
+According to \cite{chang2006characterization} empirical results show that this ratio will be $\approx$ 100.
+The relationship between $\beta$ and $n_{ACAD}$ is shown in equation \ref{eq:n_acad}. $N$ is the total number of pixels in the image. 
+\begin{equation}
+    n_{ACAD} = \frac{N}{\beta}
+    \label{eq:n_acad}
+\end{equation}
+
+In  RX and LRX, if an earlier detected anomaly has a strong spectral signature, it may influence the detection of subsequent anomalies, as the anomalies are used for calculation of the correlation or covariance matrix. This is shown in \cite{chang2006characterization}. This problem is solved in ACAD by removing previously detected anomalous pixels from the sample spectral correlation matrix, as shown in equation \ref{eq:caus_corr_anomaly_removed}. 
+\\
+
+In \cite{chang2006characterization} noise-immunity tests have been done on different ADs, including RX and ACAD. These tests adds Gaussian noise with a Signal-to-noise ratio of 20:1, 10:1 and 5:1 to a test image. One of the conclusion is that the noise has less effects on ACAD compared to the RX detector.
+\\
 
 
-
-%Problem RX; If an earlier detected anomaly has a strong signature, it may have significant impact on detection of subsqeunt detected anomalies later. Solves by removing anomalies detected from the set R when calculating the correlation matrix.\\
-%Another issue arising in K-AD(RXD) is that the size of anomaloies to be detected cannot be too large. HOw large can the size be to be considered an anomaly? - Obviously, a data sample vector that can be identified visually generally should not be considered as an anomaly. Beta; rate of image size to the size of an anomaly. Empirically \approx 100\\
-
-%Third issue ; how close is too close for two anomalies to be detected as two separate anomalies?
-%\\
-%Fourth issue; How to distinguish two detected anomalies from one another.
-\\ 
+ACAD builds a map of detected anomalies. This map may be used to classify the detected anomalies. One way of classifying anomalies could be by putting detected anomalies in to bins where anomalous pixel vectors with similar spectral signatures are put into the same bin. 
+\\
+%Might also be possible to do some binning?
 %Benefits ACAD: \\
 %- ACAD builds and updates an anomaly library and generates an anomaly map to provide spatial coordinates of all its detected anomalies in the original image. This anomaly map can also be used to classify all the detected anomalies. \\
 %- ACAD can be considered to be real time, even though the data processing may take time. Once the processing of data is completed, the whole process of anomaly dettection is also completed at nearly the same time. 
@@ -121,19 +133,29 @@ The four issues labelled Q1, Q2, Q3 and Q4 still remains.
 
 
 \section{Inverse matrix}
-Doing the inverse of a matrix is computationally intensive. There exists multiple algorithms for computing the matrix inverse. One option is to use QR-decompostion.  
+Doing the inverse of a matrix is computationally intensive. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization\cite{QRD_fpga}, and compute the pseudo-inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
 
-\subsection{QR-Factor}
+Another option to implement the inverse function is by doing Gauss-Jordan elimination. The Gauss-Jordan elimination is pretty straightforward to implement in HW and is highly parallelizable \cite{gauss_jordan_fpga}. 
 
-A QR-decomposition can certainly be used for matrix inversion because if A=QR then A−1=R−1Q−1=R−1QT and R−1 is easy to compute because R is triangular.\\
-Q-factor
-• Q is m × n with orthonormal columns (QTQ = I)
-• if A is square (m = n), then Q is orthogonal (Q^TQ = QQ^T = I)
-R-factor
-• R is n × n, upper triangular, with nonzero diagonal elements
-• R is nonsingular (diagonal elements are nonzero)
+%\subsection{QR-Factor}
 
-\subsubsection{Givens rotation}
+%A QR-decomposition can certainly be used for matrix inversion because if A=QR then A−1=R−1Q−1=R−1QT and R−1 is easy to compute because R is triangular.\\
+%Q-factor
+%• Q is m × n with orthonormal columns (QTQ = I)
+%• if A is square (m = n), then Q is orthogonal (Q^TQ = QQ^T = I)
+%R-factor
+%• R is n × n, upper triangular, with nonzero diagonal elements
+%• R is nonsingular (diagonal elements are nonzero)
 
-Givens rotation can create an upper triangular matrix
+%\subsubsection{Givens rotation}
 
+%Givens rotation can create an upper triangular matrix
+
+\subsection{Gauss-Jordan}
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.6]{images/gauss_jordan_pseudocode.PNG}
+  \caption{ Pseudocode for computing the inverse of a matrix by Gauss-Jordan elimination \cite{gauss_jordan_fpga}. } 
+  \label{fig:gauss_jordan_pseudocode}
+\end{figure}

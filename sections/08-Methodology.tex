@@ -3,71 +3,11 @@
 \chapter{Methodology}
 \label{sec:methodology}
 
+\section{Evaluation of RX, LRX and ACAD }
+\label{sec:MATLAB_methodology}
+To evaluate the performance of the ADs considered in this task, models of the algorithms were developed in MATLAB, and tested on hyperspectral image data from the Cuprite site \cite{Cuprite_data} taken by NASA's AVIRIS hyperspectral imager. MATLAB hyperspectral toolbox \cite{MATLAB_hyperspectral_toolbox} was used for image preprocessing, visualization and for having a good starting point for developing further functionality. The toolbox included an implementation of the RX algorithm. A fork of the toolbox was made, available at \cite{MATLAB_hyperspectral_toolbox_fork}, to be able to do MATLAB implementations of ACAD and LRX. The most important scripts and functions from the forked toolbox are also located in appendix \ref{appendice:MATLAB_hyperspectral}.
 
 
-\begin {table}[H]
-
-\centering
-\resizebox{1\textwidth}{!}
-{\begin{tabular}{ | l | l | l | l | l | l | l |}
-  \hline
-  \textbf{Parameter} & \cellcolor{green!25} \textbf{NanEye2D} \cite{NanEye_datasheet}  & \textbf{NanEyeCustom} \cite{naneye_custom} & \textbf{OV69481} \cite{omnivision:ov6948}  & \textbf{IMX094LQE} \cite{IMX094LQE-J} & \textbf{HM01B0}\cite{HM01B0_datasheet} & \textbf{IU233N2-Z} \cite{IU233N2-Z} \\ \hline
-  Size/footprint [mm] & \cellcolor{green!25} 1.0 x 1.0 x 1.7 & Not listed  & \cellcolor{green!25}0.575 x 0.575 & 35 x 35 & Less than 5mm^2 & 2.6 x 3.3 x 2.32\\
-  \hline
-  Supply voltage[V] & 1.7-2.4 & Not listed & 3.3 & Not listed & Digital : 1.5 & 1.2 / 1.8 / 2.7 \\
-  \hline
-  Power(typical active) [mW] &\cellcolor{green!25}  \pbox{20cm}{4 @ 1.7V supply\\voltage}& Not listed & 25 & Not listed & \cellcolor{green!25} \pbox{20cm}{  <4 @ 60 FPS \\  <2 @ 30FPS  \\
-  0.670  @30FPS }& \pbox{20cm}{~55 mW @60fps\\
-~8 @ 3fps} \\
-
-\hline
-Resolution  &\cellcolor{green!25}  250 x 250 & Not listed &\cellcolor{green!25}  200 x 200 & 4932 x 7380 & \cellcolor{green!25}320 x 320 & 1296 x 816 \\
-\hline 
-\pbox{20cm}{Video data interface/\\output interface} & 10-bit digital LVDS & Not listed & Analog & Not listed & 1b, 4b, 8b with & MIPI CSI-2 1 lane\\
-& & & & &  frame/line SYNC &\\
-\hline
-Shutter type & Rolling & Not listed & Rolling & Rolling & Not listed & Not listed \\
-\hline
-\pbox{20cm}{Development kit/ \\Evaluation kit available?} & \cellcolor{green!25} Yes & No & \cellcolor{green!25} Yes & No & No & No\\
-& \cellcolor{green!25} & &  \cellcolor{green!25}& & &\\
-\hline
-  
-\end{tabular}}
-\caption {Image sensor comparison. Values are taken from the respective datasheets of each image sensor. Cells marked with green shows that the cell value is relatively good or satisfy specifications presented in table \ref{table:camera_specications}. } \label{table:image_sensor_alternatives} 
-\end {table}
-
-
-
-\begin{figure}[H]
-\begin{minipage}[]{.5\linewidth}
-\centering
-\subfloat[Picture of NanEye2D image sensor. It is a module packaged CMOS image sensor with an integrated lens. It is fully self timed. Interfacing/communication is done with LVDS.]{\includegraphics[scale=0.15]{images/NanEye_vs_finger.png}}
-  %\caption{Lena 256 x 256 uncompressed. Used for testing of MatLab SPIHT script.}
-  %\label{fig:lena_unc}
-\end{minipage}%
-\begin{minipage}[]{.5\linewidth}
-\centering
-  \subfloat[NanEye2D schematic.]{\includegraphics[scale=.5]{images/NanEye_cabling.PNG}}
-  %\caption{Lena 256 x 256 reconstructed after being compressed having 0.1 bpp, using the Matlab SPIHT script. See appendix. }
-  %\label{fig:lena_comp}
-\end{minipage}
-
-\caption{The NanEye2D image sensor (a), (b).}
-\label{fig:NanEye2D}
-\end{figure}
-
-
-
-
-\begin{figure}[H]
-\centering
-   \includegraphics[scale=0.5]{images/NanEye_FPS_vs_voltage.PNG}
-  \caption{ Relationship between framerate and supply voltage \cite{Eyes_of_things_NanEye}. Blue are typical values, red are max and min values. } 
-  \label{fig:FPS_vs_voltage}
-\end{figure}
-
-
- 
- \subsection{Optimizations}
- Something something Inverse is computational heavy
- \subsubsection{QR-factorization}
+% \subsection{Optimizations}
+ %Something something Inverse is computational heavy
+ %\subsubsection{QR-factorization}
