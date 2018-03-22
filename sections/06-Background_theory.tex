@@ -24,6 +24,7 @@ Algorithms used for anomaly detection outputs the probability that the spectral 
 %\subsection{Causality}
 
 \subsection{Reed-Xiaoli algorithm}
+\label{sec:RX_theory}
 The Reed-Xiaoli(RX) algorithm \cite{reed1990adaptive} is one of the most widely used algorithms for anomaly detection in HSI, and is considered as the benchmark anomaly detection algorithm for hyperspectral data \cite{yang2015dual}.  
 \\
 The RX algorithm was developed to address the scenario where no prior knowledge about the target signatures is available. Assuming that a single pixel target, \textbf{x}, is the observation test vector, the result of the RX algorithm is given by the filter in equation \ref{eq:RX_algorithm}.
@@ -36,7 +37,8 @@ The RX algorithm was developed to address the scenario where no prior knowledge 
 In equation \ref{eq:RX_algorithm} $\textbf{u}_b$ is the estimated background clutter sample mean, computed from the set of all pixel vectors in the image (referred to as the \textit{global set}  ). $\sum$ is the estimated background clutter covariance, estimated on the global set. Since the covariance is computed on the global set of pixels, the HSI needs to collect all data contained in the entire image before the RX anomaly detector(AD) can start. This means that the RX-algorithm in the original variant does not have the possibility to operate in real-time. 
 
 \subsection{Local RX algorithm}
-An often used and important variant of the RX algorithm is the local RX(LRX) algorithm. By substituting the sample covariance matrix computed on the global set with the correlation matrix computed on a kernel of size $k x k$ pixel vectors, it is possible to increase the parallelism of the AD and to get near real-time performance. The LRX can be considered as a local AD because each pixel of the image has its own correlation matrix. This correlation matrix is computed on the square kernel of size $k x k$. The result of the LRX AD can then be expressed as in equation \ref{eq:LRX}. $\textbf{x}$ is the observation test pixel vector. $\textbf{R}$$_{k x k}$$(\textbf{x})}$ is the correlation matrix of pixel vector $\textbf{x}$ computed on a square kernel of size $k x k$ containing local neighbouring pixels. See figure \ref{fig:LRX}. 
+\label{sec:LRX_theory}
+An often used and important variant of the RX algorithm is the local RX(LRX) algorithm. By substituting the sample covariance matrix computed on the global set with the correlation matrix computed on a kernel of size $k x k$ pixel vectors, it is possible to increase the parallelism of the AD and to get near real-time performance. The LRX can be considered as a local AD because each pixel of the image has its own correlation matrix. This correlation matrix is computed on the square kernel of size $k x k$. The result of the LRX AD can then be expressed as in equation \ref{eq:LRX}. $\textbf{x}$ is the observation test pixel vector. $\textbf{R}$ $_{k x k}$ ($\textbf{x}$) is the correlation matrix of pixel vector $\textbf{x}$ computed on a square kernel of size $k x k$ containing local neighbouring pixels. See figure \ref{fig:LRX}. 
 
 \begin{equation}
     \delta_k^{LRX}(\textbf{x}) = \textbf{x}^T\textbf{R}_{k x k}(\textbf{x})^{-1}\textbf{x}
@@ -52,8 +54,9 @@ An often used and important variant of the RX algorithm is the local RX(LRX) alg
 \end{figure}
 
 
-\section{Adaptive Causal Anomaly Detection}
-An improved variant of the RX AD is the Adaptive Causal Anomaly detection (ACAD) \cite{chang2006characterization}. One issue of the RX algorithm is that previously detected anomalies with strong spectral signatures may have an impact upon the detection of later anomalies. This is shown in \cite{chang2006characterization}. ACAD is adaptive in the way that it builds a map of detected anomalies, and removes the previously detected anomaly pixel vectors from the causal sample correlation set. \\
+\subsection{Adaptive Causal Anomaly Detection}
+\label{sec:ACAD_theory}
+An variant of the RX AD is the Adaptive Causal Anomaly detection (ACAD) \cite{chang2006characterization}. One issue of the RX algorithm is that previously detected anomalies with strong spectral signatures may have an impact upon the detection of later anomalies, as they may influence what is consider the background. This is shown in \cite{chang2006characterization}. ACAD is adaptive in the way that it builds a map of detected anomalies, and removes the previously detected anomaly pixel vectors from the causal sample correlation set. \\
 Another benefit of ACAD relative to RX and LRX is that it is real-time. This is achieved by using the causal correlation matrix $\textbf{R}$($\textbf{x}$), defined in equation \ref{eq:caus_corr}, instead of the covariance or the correlation matrix computed on the global or a local set of pixel vectors, as in RX and LRX, respectively. In equation \ref{eq:caus_corr} $\textbf{x}$ is the observation test pixel vector, and $k$ is the index of the pixel vector currently being processed. The sum in equation \ref{eq:caus_corr} sums the correlation matrix for the pixel sample vectors {$\textbf{x}_1$, ....$\textbf{x}_k$}.  
 
 \begin{equation}
@@ -72,7 +75,7 @@ In equation \ref{eq:caus_corr_anomaly_removed} $\Delta(k)$ is the set of all ear
 \\
 ACAD can then be defined as in equation \ref{eq:ACAD}.
 \begin{equation}
-    \delta^{ACAD}(\textbf{x}_k)= \textbf{x}_k^T\Tilde{\textbf{R}}^{-1}(\textbf{x}_k)\textbf{x}_k
+    \delta^{ACAD}(\textbf{x}_k)= \textbf{x}_k^T\Tilde{\textbf{R}}(\textbf{x}_k)^{-1}\textbf{x}_k
     \label{eq:ACAD}
 \end{equation}
 
@@ -131,11 +134,30 @@ ACAD builds a map of detected anomalies. This map may be used to classify the de
 %Note to self; include comparison here of the different Anomalies Detector
 
 
+\subsection{Adaptive Local RX}
+\label{sec:Adaptive_LRX_theory}
+A modification of the LRX algorithm presented in section \ref{sec:LRX_theory} is the Adaptive Local RX (ALRX). This AD is a modification of LRX is presented by the author and is not yet described in literature(as far as the author knows). 
+\\
+
+ALRX is inspired by the anomaly-map creation and the removal of previously detected anomaly pixel vectors from the causal sample correlation set as done in the ACAD AD. Similarly, ALRX builds a anomaly map and removes previously detected anomaly pixel vectors that are located within the local window from the local sample correlation set. The result of the ALRX AD is shown in equation \ref{eq:ALRX}. 
+
+\begin{equation}
+    \delta_k^{ALRX}(\textbf{x}) = \textbf{x}^T\Tilde{\textbf{R}}_{k x k}(\textbf{x})^{-1}\textbf{x}
+    \label{eq:ALRX}
+\end{equation}
+
+
+\begin{equation}
+   \Tilde{\textbf{R}}_{k x k}(\textbf{x})= \textbf{R}_{k x k}(\textbf{x})-\sum_{t_j\in\Delta(k_{KxK})}\textbf{t}_j\textbf{t}_j^T
+    \label{eq:ALRX_anomaly_removed}
+\end{equation}
+
+In equation \ref{eq:ALRX_anomaly_removed} $\Delta(k_{KxK})$ is the set of previously detected anomalous pixel vectors $\textbf{t}_j$ located within the local window of size $KxK$ with center in the image pixel vector currently being processed, $\textbf{x}$.
 
 \section{Inverse matrix}
-Doing the inverse of a matrix is computationally intensive. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization\cite{QRD_fpga}, and compute the pseudo-inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
+Doing the inverse of a matrix is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization\cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
 
-Another option to implement the inverse function is by doing Gauss-Jordan elimination. The Gauss-Jordan elimination is pretty straightforward to implement in HW and is highly parallelizable \cite{gauss_jordan_fpga}. 
+Another option to implement the inverse function is by doing Gauss-Jordan elimination. The Gauss-Jordan elimination is simpler to implement in HW than the method of QR-factorization method. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. 
 
 %\subsection{QR-Factor}
 
