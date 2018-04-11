@@ -13,7 +13,7 @@ This master thesis is part of the NTNU SmallSat \cite{SmallSat_project_descripti
   \label{fig:HSI_concept}
 \end{figure}
 
-The hyperspectral imager used in NTNU SmallSat project has 100 usable bands, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per line/row in the image. The hyperspectral imagers operation can be seen in Figure \ref{fig:HSI_functionality}. 
+The hyperspectral imager used in NTNU SmallSat project has 100 usable bands, $N_{bands}$, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per line/row in the image. The hyperspectral imagers operation can be seen in Figure \ref{fig:HSI_functionality}. 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.3]{images/hyperspectral_imager.PNG}
@@ -53,21 +53,21 @@ According to \cite{SmallSat_project_description} the time requirements for actua
 
 \newpage
 \subsection{Project report overview}
-The following chapters in this project report delve into the implementation of an AD on a Xilinx Virtex-7 FPGA. \\  
+The following chapters in this project report delve into the implementation of an AD on a Xilinx Virtex-7 FPGA. The AD is made for the Smallsat project. \\  
 
 Chapter \ref{sec:theory} is the Theory section.  Algorithms considered used for anomaly detection are described in this chapter.  \\
 
 
-Chapter \ref{sec:methodology} is the Methodology section. In this section tests of the different anomaly-detectors has been done.  
+Chapter \ref{chapter:review_anomaly_detectors} contains the review of the considered ADs presnted in chapter \ref{sec:theory}. In this section tests of the different anomaly-detectors has been done in MATLAB on synthetic images and on real image data from the Cuprite scene.\\  
 
 
-Chapter \ref{sec:results} is the Results section. 
+Chapter \ref{sec:results} is the Results section. This section contains synthesis results, verification results and results from testing on HW.
 \\
 
-Chapter \ref{sec:Discussion} is the Discussion section
+Chapter \ref{sec:Discussion} is the Discussion section. 
 \\
 
-Chapter \ref{sec:conclusion} is the Conclusion section. The most important results are presented here. The proposed system of the miniature camera is presented as well. Future work that can be done is mentioned, listed in bullet-points. 
+Chapter \ref{sec:conclusion} is the Conclusion section. The most important results are presented here.  
 \\
 
 

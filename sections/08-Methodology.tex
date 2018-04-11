@@ -98,7 +98,7 @@ SimAviris01    & 70           & 550             & 25x25
 \end{figure}
 
 \subsection{RX}
-
+Since the RX AD does not build an anomaly map, the author defines anomalous pixels as pixels having a score of $\geqslant$ 75\% of the max value outputted from the RX AD. This is done in order to be able to set the objective metrics $false\_anomalies$ and $\%correctly\_predicted\_anomalies$ for the RX detector in order to compare it to the other evaluated ADs. 
 
 \subsubsection{Hsueh-mimicked image}
 
@@ -124,9 +124,25 @@ SimAviris01    & 70           & 550             & 25x25
 The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = $0.3714$ for this test.
 
 \subsubsection{$Sim30\_30AVIRIS$ scene }
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.4]{images/AD_testing/synthetic_images/rx_ad_30_30.png}
+  \caption{ RX AD results for the $Sim30\_30AVIRIS$ scene.} 
+  \label{fig:rx_sim_aviris_30_30}
+\end{figure}
+
+The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = $1$ for this test.
 
 
+\subsubsection{$Sim\_Aviris01$ scene }
+\begin{figure}[H]
+\hbox{\hspace*{-1cm}                                              
+   \includegraphics[scale=0.4]{images/AD_testing/synthetic_images/rx_ad_614_100.png}}
+  \caption{ RX AD results for the $Sim\_Aviris01$ scene.} 
+  \label{fig:rx_sim_aviris_01}
+\end{figure}
 
+The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = $1$ for this test.
 
 \subsection{LRX}
 
@@ -136,10 +152,8 @@ The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = 
 
 
 \section{Testing on data from real images}
-To evaluate the performance of the ADs considered in this task, models of the algorithms were developed in MATLAB, and tested on hyperspectral image data from 
-
-
- Band 220 from the Cuprite scene can be seen in figure \ref{fig:cuprite_scene_band_220}.
+To evaluate the performance of the ADs considered in this task they were tested on hyperspectral image data from the Cuprite mining area captured by the AVIRIS hyperspectral camera.
+ Band 220 from Cuprite scene 02 can be seen in figure \ref{fig:cuprite_scene_band_220}. The real image data does not provide a means for calculating objective metrics such as $false\_anomalies$ and $\%correctly\_predicted\_anomalies$, but gives an impression of the considered ADs performance when applied to real image data.
 
 \begin{figure}[H]
 
@@ -171,8 +185,8 @@ LRX computes the correlation matrix on a pixel vector block of size $K$ in order
 
 \hbox{\hspace*{-2cm}                                                           
 
-   \includegraphics[scale=0.3]{images/AD_testing/K=23.png}}
-  \caption{Result from LRX AD with a kernel size of K=23 on Cuprite image data. Higher score indicates higher probability of the pixel being anomalous. } 
+   \includegraphics[scale=0.3]{images/AD_testing/hyperspectral_images/real_images/K=25_using_gauss_jordan_colormap_jet.png}}
+  \caption{Result from LRX AD with a kernel size of K=25 on Cuprite image scene 02. Higher score indicates higher probability of the pixel being anomalous. } 
   \label{fig:cuprite_scene_band_220}
 \end{figure}
 
