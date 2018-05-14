@@ -155,7 +155,7 @@ ALRX is inspired by the anomaly-map creation and the removal of previously detec
 In equation \ref{eq:ALRX_anomaly_removed} $\Delta(k_{KxK})$ is the set of previously detected anomalous pixel vectors $\textbf{t}_j$ located within the local window of size $KxK$ with center in the image pixel vector currently being processed, $\textbf{x}$.
 
 \section{Inverse matrix}
-Doing the inverse of a matrix is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization\cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
+Computing the inverse of a matrix is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization\cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
 
 Another option to implement the inverse function is by doing Gauss-Jordan elimination. The Gauss-Jordan elimination is simpler to implement in HW than the method of QR-factorization method. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. 
 
@@ -177,7 +177,7 @@ Another option to implement the inverse function is by doing Gauss-Jordan elimin
 
 \begin{figure}[H]
 \centering
-   \includegraphics[scale=0.6]{images/gauss_jordan_pseudocode.PNG}
-  \caption{ Pseudocode for computing the inverse of a matrix by Gauss-Jordan elimination \cite{gauss_jordan_fpga}. } 
+   \includegraphics[scale=0.6]{images/gauss_jordan_pseudocode.png}
+  \caption{ Pseudocode for computing the inverse of a matrix by Gauss-Jordan elimination \cite{gauss_jordan_fpga}. The code can be divided into three parts; forward elimination, marked by black square, backward elimination, marked by red square and last divison, marked by green square. } 
   \label{fig:gauss_jordan_pseudocode}
 \end{figure}

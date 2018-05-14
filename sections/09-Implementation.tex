@@ -1,30 +1,49 @@
 \newpage
 \chapter{Hardware implementation}
 \label{sec:implementation}
-\section{Memory management}
+The following chapter describes the implementation of the ACAD anomaly detector on a Zynq Z-7030 device.
+
+
+\section{Top level architecture}
+
+The top level architecture of the ACAD Anomaly detector is shown in Figure \ref{fig:top_level_ACAD}. It consists of five blocks; \textbf{FSM ACAD}, \textbf{Shiftregister\_four\_bands}, \textbf{ACAD correlation module}, \textbf{ACAD inverse module Gauss Jordan} and \textbf{dACAD module}.
+
+\begin{figure}[H]
+\refstepcounter{figure}
+\begin{tabular}{c|c}
+
+   \includegraphics[scale=0.6, angle=90, origin=c]{images/acad_top_level.PNG}
+   \rotatebox[origin=c]{90}{ Figure~\thefigure: Top level architecture of the ACAD anomaly detector.}
+  %\caption{ \textbf{ROTATE}FSM controlling the architecture shown in Figure  } 
+  \end{tabular}
+  \label{fig:top_level_ACAD}
+\end{figure}
+
+\section{Memory considerations}
 \label{sec:memory_management}
+    As the ACAD anomaly detector is to be implemented on a Zynq Z-7030 or Z-7035 device, care must be taken when designing, with respect to logic and memory usage. As the hyperspectral image data inputted to the AD might have $P\_BANDS$=100, with 16-bit image data per spectral band, memory usage is an important consideration.   
+
 \subsection{Correlation matrix}
 \label{sec:mem_management_correlation_matrix}
-Storing and updating the causal correlation matrix sum as shown in equation \ref{eq:caus_corr} requires a lot of memory resources. This update needs to be done for each pixel in the image, and the memory used for this operation is therefore important in order to make the AD real-time. The size of the correlation matrix will be $p * p$, where $p$ is the number of spectral bands in the image. As mentioned, the number of usable bands $N_{bands}$ is 100. The image pixel data width, $pixel\_data\_width$ is assumed to be 16 bit/band/pixel. As the correlation matrix is the product of $\textbf{x}$ * $\textbf{x}^T$ the resulting width will be 2* $pixel\_data\_width$. Using spectral information from all the bands would require $p * p * 32$= $100$ *$100$ *$32$ bit = $320 kbit$ of memory storage. 
+Storing and updating the causal correlation matrix sum as shown in equation \ref{eq:caus_corr} requires a lot of memory resources. This update needs to be done for each pixel in the image, and the memory used for this operation is therefore important in order to make the AD real-time. The size of the correlation matrix will be $p * p$, where $p$ is the number of spectral bands in the image. As mentioned, the number of usable bands $N_{bands}$ is 100. The image pixel data width, $pixel\_data\_width$ is assumed to be 16 bit/band/pixel. As the correlation matrix is the product of $\textbf{x}$ * $\textbf{x}^T$ the resulting correlation pixel width will be 2* $pixel\_data\_width$. Using spectral information from all the bands would require $p * p * 32$= $100$ *$100$ *$32$ bit = $320 kbit$ of memory storage. 
 \\
 
-There are three alternatives to storing all this information on the FPGA, storing it in block RAM, distributed RAM or in registers. The FPGA to be used in the SmallSat's first prototype is the Zynq Z-7030 or Zynq Z-7035. It contains the memory resources as shown in figure \ref{fig:zynq_memory_resources}.
+There are three alternatives to storing all this information on the FPGA; storing it in block RAM, distributed RAM/LUTRAM or in registers. The FPGA to be used in the SmallSat's first prototype is the Zynq Z-7030 or the Zynq Z-7035. 
+The FPGAs contains the memory resources as shown in figure \ref{fig:zynq_memory_resources}.
 
 
 
 
 
 \begin{figure}[H]
-\centering                                                           
-
-   \includegraphics[scale=0.5]{images/zynq_memory_resources.PNG}
-  \caption{Zynq memory resources, found in \cite{cite:mem_resources_zynq}} 
+\centering                                                              \includegraphics[scale=0.5]{images/zynq_memory_resources.PNG}
+  \caption{Zynq memory resources, found in \cite{cite:mem_resources_zynq}.} 
   \label{fig:zynq_memory_resources}.
 \end{figure}
 
 \subsubsection{Using registers}
-The Zynq Z-7030 and the Zynq Z-7035 have $157,200$ and $343,800$ flip flops each, respectively. Using equation \ref{eq:max_bands}, the maximal number of spectral bands used is 70 and 103. However, this is unrealistic as this leaves no free flip flop free in the design. As the AD implemented in this task is a part of a larger processing pipeline (insert picture of pipeline somewhere?) it is not acceptable to use all of the available flip flops. Assuming that it is acceptable to use 15\% of the available flip flops, the number of spectral bands that can be used is 27 and 40. This dimensional reduction can be done through pre-prossesing of data by for example Principal Component Analysis(PCA). (insert result showing AD doing better with PCA in front?). 
-The benefit of the use of registers is the speed and the ability of instantaneous update (after a clock cycle). This will lead to the AD becoming closer to real-time than if distributed RAM or BRAM is used.
+The Zynq Z-7030 and the Zynq Z-7035 have $157,200$ and $343,800$ flip flops each, respectively. Using equation \ref{eq:max_bands}, the maximal number of spectral bands used is 70 and 103. However, this is unrealistic as this leaves no flip flop free for other use in the design. As the AD implemented in this task is a part of a larger processing pipeline (insert picture of pipeline somewhere?) it is not acceptable to use all of the available flip flops. Assuming that it is acceptable to use 15\% of the available flip flops, the number of spectral bands that can be used is 27 and 40 for the Zynq Z-7030 and the Zynq Z-7035 respectively. This dimensional reduction can be done through pre-prossesing of data by for example Principal Component Analysis(PCA). (insert result showing AD doing better with PCA in front?). 
+The benefit of the use of registers is the speed and the ability of instantaneous update. %This will lead to the AD becoming closer to real-time than if distributed RAM or BRAM is used.
 
 \begin{equation}
     max\_bands= \sqrt{\frac{number\_of\_registers}{2*pixel\_data\_width}}
@@ -32,7 +51,23 @@ The benefit of the use of registers is the speed and the ability of instantaneou
 \end{equation}
 
 \subsubsection{Using BRAM}
-The Z-7030 and the Z-7035 contains 265 and 500 $36$kbit BRAM - blocks. In  order to store the largest correlation matrix of $320 kbit$ 9 BRAM blocks are needed. Each 36 kbit BRAM block consists of two 18 kbit BRAM blocks. In true dual port(TDP) mode \cite{cite:ug953}, it is possible to do two writes and two reads per BRAM each clock cycle, with each write and read being maximum 36 bits. Equation \ref{eq:clk_cycles_corr_update_BRAM} shows the calculation of number of clock cycles needed to update the correlation matrix, $n\_clk\_update\_corr\_BRAM$. This is done for each pixel in the image. $n\_BRAM$ is the number of BRAM used to store the correlation matrix. The total time spent updating the correlation matrix for the entire image is given by equation \ref{eq:clk_cycles_corr_image}. Updating a correlation matrix wih $p$ = 100, using 9 BRAMs in TDP mode would require 556 clk cycles. For the entire image, having $N\_pixels$ the total amount of clock cycles spent updating the correlation matrix would be 349648384. At a target clock frequency of 100 MHz this would require $3.49648$ seconds, which is not to be considered real time.   
+The Z-7030 and the Z-7035 contains 265 and 500 $36$kbit BRAM - blocks respectively. In  order to store the largest correlation matrix of $320 kbit$ a minimum of 9 BRAM blocks are needed. Each 36 kbit BRAM block consists of two 18 kbit BRAM blocks. In true dual port(TDP) mode \cite{cite:ug953}, it is possible to do two writes and two reads per BRAM per clock cycle, with each write and read being maximum 36 bits. BRAMs in TDP mode have only one address input, the same address for reads and writes. This makes it hard to use for the correlation module, as the ACAD correlation needs to read previously stored data from the BRAM before writing to the same address. Therefore, it is necessary to have a separate read and write address. By inferring two separate Simple Dual Port(SDP) 18kbit BRAMs, by the code shown in Listing \ref{lst:inferr_bram}, it is possible to get two writes and two reads per cycle, with separate read and write addresses. Two SDPs are stored within one 36kbit BRAM block. This is shown in Figure \ref{fig:BRAM_hierarchy}.
+
+\lstinputlisting[caption={Code for inferring a SDP 18 kbit BRAM.},label={lst:inferr_bram},style=customc]{code/bram_espen_sdp.vhd}
+
+
+\begin{figure}[H]
+\centering
+
+   \includegraphics[scale=0.5]{images/BRAM_two_18_kbit.PNG}
+  \caption{BRAM hierarchy for correlation module, showing two 18kbit BRAM blocks, contained within one 36kbit BRAM block. } 
+  \label{fig:BRAM_hierarchy}
+\end{figure}
+
+\\
+
+
+Equation \ref{eq:clk_cycles_corr_update_BRAM} shows the calculation of number of clock cycles needed to update the correlation matrix, $n\_clk\_update\_corr\_BRAM$. This is done for each pixel in the image. $n\_BRAM$ is the number of 36 kbit BRAMs used to store the correlation matrix. The total time spent updating the correlation matrix for the entire image is given by equation \ref{eq:clk_cycles_corr_image}. Updating a correlation matrix wih $p$ = 100, using 9 BRAMs in TDP mode would require 556 clk cycles. For the entire image, having $N\_pixels$ the total amount of clock cycles spent updating the correlation matrix would be 349648384. At a target clock frequency of 100 MHz this would require $3.49648$ seconds, which is not to be considered real time.   
 
 \begin{equation}
     n\_clk\_update\_corr\_BRAM = \frac{p * p }{2 * n\_BRAM}
@@ -45,22 +80,32 @@ The Z-7030 and the Z-7035 contains 265 and 500 $36$kbit BRAM - blocks. In  order
 \end{equation}
 
 
-Figure \ref{fig:update_time_correlation_BRAM} shows the total time spent updating the correlation matrix for a image of 1088 pixel rows with 578 effective pixels per row, with a target clock frequency of 100 MHz. The BRAMs are assumed written to in parallell.  
+Figure \ref{fig:update_time_correlation_BRAM} shows the total time spent updating the correlation matrix for a image of 1088 pixel rows with 578 effective pixels per row, with a target clock frequency of 100 MHz. The BRAMs are assumed written to in parallel.  
 
 \begin{figure}[H]
 \centering
-   \includegraphics[scale=0.3]{images/time_spent_updating_correlation_matrix.png}
-  \caption{Estimated time spent updating correlation matrix for an image of 1088 pixel rows with 578 effective pixel per row, with a target clock frequency of 100 MHz, plotted as a function of number of BRAMs used to store and update the correlation matrix. Plotted for spectral bands in the range of P=20 to P=100. } 
+\hbox{\hspace*{-2cm}                                                           
+
+   \includegraphics[scale=0.3]{images/time_spent_updating_correlation_matrix.png}}
+  \caption{Estimated time spent updating correlation matrix for an image of 1088 pixel rows with 578 effective pixel per row, with a target clock frequency of 100 MHz, plotted as a function of number of 36 kbit BRAMs used to store and update the correlation matrix. Plotted for spectral bands in the range of P=20 to P=100. } 
   \label{fig:update_time_correlation_BRAM}
 \end{figure}
 
+\section{Shiftregister\_four\_bands}
+
+
+
 \section{ACAD correlation}
 \label{sec:correlation_hw}
-\subsection{Memory management}
-As the design is in the early phases, the value of $p$ used throughout the project is insecure. Another insecurity is the performance of the ACAD AD using PCA pre-processing, i.e. reducing the number of spectral bands in the AD. In addition, the ACAD AD requires storing of the inverse matrix, and the sum of anomaly detected. This is shown in figure X ( insert a figure showing the equation and what needs to be stored where). It is therefore not desirable to store the entire correlation matrix in registers, as there will be a need for storing other matrices in BRAM or slower storage, thereby inserting a bottleneck in the pipeline.
+The \textbf{ACAD correlation module}, as shown in Figure \ref{fig:top_level_ACAD}, is responsible for computing the ACAD correlation matrix $\Tilde{\textbf{R}}_{k x k}(\textbf{x}).
 \\
 
-As shown in Figure \ref{fig:update_time_correlation_BRAM} the time spent updating the correlation matrix can be reduced by increasing number of BRAMs used to store the correlation matrix. By setting the  number of BRAMs used to store the correlation matrix, $N\_BRAMS\_correlation$, equal to $P\_BANDS$ the control logic is simplified while achieving an acceptable trade off between speedup as a function of number of BRAMs used and resources used. Figure \ref{fig:data_flow_cube_dma_to_inverse} shows the data flow from the Cube DMA through the ACAD correlation module. 
+As the SmallSat project is in the early phases, the value of $p$ for the data inputted to the AD from preprocessing steps are insecure. Another insecurity is the performance of the ACAD AD using PCA pre-processing, i.e. reducing the number of spectral bands in the AD. In addition, the ACAD AD requires storing of the inverse matrix, and the sum of anomaly detected. This is shown in figure X ( insert a figure showing the equation and what needs to be stored where). It is therefore not desirable to store the entire correlation matrix in flip flops, as there will be a need for storing other matrices, either in BRAM or DRAM, thereby inserting a bottleneck in the pipeline relative to the flip flop-updating step. Using BRAMs it is also possible to make a scalable solution for both small and large $p$. 
+\\
+
+
+As shown in Figure \ref{fig:update_time_correlation_BRAM} the time spent updating the correlation matrix can be reduced by increasing number of 36kbit BRAMs used to store the correlation matrix. By setting the  number of 36kbit BRAMs used to store the correlation matrix, $N\_BRAMS\_correlation$, equal to $P\_BANDS$ it is possible to store one column of the correlation matrix in each BRAM. This simplifies the control logic while achieving an acceptable trade off between speedup as a function of number of BRAMs used and resources used. Figure \ref{fig:data_flow_cube_dma_to_inverse} shows the data flow from the Cube DMA through the ACAD correlation module, with $N\_BRAM\_correlation$ =$P\_BANDS$. 
+\\
 
 
 \begin{figure}[H]
@@ -70,6 +115,277 @@ As shown in Figure \ref{fig:update_time_correlation_BRAM} the time spent updatin
   \label{fig:data_flow_cube_dma_to_inverse}
 \end{figure}
 
+Setting $N\_BRAMS\_correlation$ = $P\_BANDS$ allows to write to $P\_BANDS$ number of columns of the correlation matrix at the same time. As it is possible to write two 32 bit elements per cycle for each 36 kbit BRAM block, the total correlation matrix update time per pixel is $\frac{P\_BANDS}{2}$. 
+
+
+The design is made for an even number of $P\_BANDS$. If odd number of spectral band is used, a band with zero values has to be inserted before inputting to the correlation module.\\
+
+The design is made to be scalable with $P\_BANDS$, and will synthesize $P\_BANDS$ 36 kbit BRAMs and $P\_BANDS * 2$ DSP48E1(used for multiplication). By changing the value of the constant $P\_BANDS$ found in the $common\_types\_and\_functions$ package, the number of correlation sub-modules is changed. These sub-modules are shown in Figure \ref{fig:data_flow_correlation}. 
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.6]{images/correlation_data_path_with_adders.PNG}
+  \caption{Data flow within the correlation module. The dotted lines marks one correlation sub-module. $P\_BANDS$ such modules are synthesized in the design. } 
+  \label{fig:data_flow_correlation}
+\end{figure}
+
+The design was synthesized for $P\_BANDS$=10,20,30,40,50,60,70,80,90,100. Synthesis results show that the design scales as expected with respect to number of BRAM36E1 and DSP48E1 used. Figure \ref{fig:primitves_correlation}  shows the number of synthesized primitives  BRAM36E1 and DSP48E1. Figure \ref{fig:luts_and_regs_corr} shows number of synthesized SLICE REGISTERS and SLICE LUTS as a function of $P\_BANDS$.
+
+\begin{figure}[H]
+
+\hbox{\hspace*{-2cm}                                                           
+   \includegraphics[scale=0.3]{images/number_of_BRAMS_and_DSP48.png}}
+  \caption{Number of synthesized BRAM36E1 and DSP48E1 as a function of $P\_BANDS$. Results gathered from synthesis utilization report. } 
+  \label{fig:primitves_correlation}
+\end{figure}
+
+
+\begin{figure}[H]
+
+\hbox{\hspace*{-2cm}                                                           
+   \includegraphics[scale=0.3]{images/correlation_luts_and_registers.png}}
+  \caption{Number of synthesized SLICE REGISTERS and SLICE LUTS as a function of $P\_BANDS$. Results gathered from synthesis utilization report. } 
+  \label{fig:luts_and_regs_corr}
+\end{figure}
+
+
+Pixel data inputted to the correlation module is inputted as a horizontal vector. For ACAD, the correlation matrix is presented in equation \ref{eq:caus_corr}. The correlation matrix is written to $N\_BRAM\_correlation$ in parallel, where the leftermost column(column zero) of the correlation matrix is written to BRAM\_0, column one to BRAM\_1,.. column P\_BANDS-1 to BRAM\_P\_BANDS-1. For each 36 kbit BRAM, two 18kbit BRAM blocks are accessed, one for even indexes of the column, and one for odd indexes of the column. This is also shown in figure \ref{fig:BRAM_hierarchy}. In Figure \ref{fig:BRAM_matrix} the addressing scheme for each 36kbit BRAM is presented, exemplified by BRAM\_0 and BRAM\_P\_BANDS-1. As shown in the figure, elements of column zero is stored in BRAM\_0, while elements of column P\_BANDS-1 is stored in BRAM\_P\_BANDS-1. Each 36 kbit BRAM consists of two 18 kbit blocks, storing even and odd row-index elements respectively. 
+
+%the write sequence for each 36kbit BRAM is presented, exemplified by BRAM0. Here, the vertical vector element is din[PIXEL\_DATA\_WIDTH-1:0], shown by the blue line. The green lines shows data processed and BRAM written to during the first clock cycle. The red lines marks the second clock cycle and the orange lines marks the last clock cycle.  
+
+
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/bram_addressing_matrix.PNG}
+  \caption{Storing matrix elements in different 36kbit BRAMs, storing one column of a matrix per BRAM. Each 36 kbit BRAM consists of two 18kbit BRAM blocks, one block storing even indexes of the matrix column, and one block storing odd indexes of the matrix column.    } 
+  \label{fig:BRAM_matrix}
+\end{figure}
+
+
+
+
 
 \section{Inverse computation}
 \label{sec:inverse_computation_hw}
+Due to its low complexity, the Gauss-Jordan elimination was chosen to compute the inverse. A drawback with this algorithm is that it uses division. Division is an operation that is computationally intensive in hardware, and requires a large amount of logic to be implemented. An early implementation of the Gauss-Jordan elimination by the author included the use of real division. This approach utilized $P\_BANDS$ numbers of divisions, to ensure that one row of the inverse matrix could be computed in one clock cycle. The inner loop operation of forward and backward elimination in Figure \ref{fig:gauss_jordan_pseudocode} for this approach is shown in Figure.  A scaling problem became apparent, as this approach utilized too many LUTs as functions.  This is showed in the results, section \ref{sec:synthesis:luts_and_registers_inverse}. 
+Another approach was made, \textbf{INSERT figures here}..
+
+An approach to avoid division by adaptive shifting as described in section \ref{sec:adaptive_shifting}. 
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/inverse_approach_P_BANDS_divisions/inverse_core_old_approach.PNG}
+  \caption{Architecture showing the first approach to implementing the forward and backward inner loop operation from Figure \ref{fig:gauss_jordan_pseudocode}. $P\_BANDS$ modules marked by the dotted border was synthesized.  } 
+  \label{fig:inverse_P_BANDS_number_of_divisions}
+\end{figure}
+
+
+\subsection{Top level architecture}
+The top level architecture of the inverse module can be seen in Figure \ref{fig:top_level_inverse}. This is an implementation of the Gauss-Jordan algorithm shown in Figure \ref{fig:gauss_jordan_pseudocode}. The \textbf{Forward elimination} block correspond to operations marked by the black square in Figure \ref{fig:gauss_jordan_pseudocode}, while \textbf{Backward elimination} and \textbf{Last division} blocks correspond to the operations marked by the red and green squares in Figure \ref{fig:gauss_jordan_pseudocode} respectively, with an exception to the operations shown in Figure \ref{fig:elimination_inner_core_pseudocode}.These operations are part of both the forward elimination and backward elimination blocks in the Gauss-Jordan inverse. They are therefore put in an external process, called \textbf{Elimination core}. 
+\\
+
+\textbf{A} and \textbf{A\_inv} are two BRAM36 arrays of size $P\_BANDS$, in which $\textbf{A}$ and $\textbf{A}^{-1}$ are stored, respectively. 
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.3]{images/inverse_hw/elimination_inner_core_pseudocode.PNG}
+  \caption{The operations computed by the \textbf{Elimination core}, utilized by both the \textbf{Forward elimination} and the \textbf{Backward elimination} block.  } 
+  \label{fig:elimination_inner_core_pseudocode}
+\end{figure}
+
+
+\begin{figure}[H]
+\refstepcounter{figure}
+\begin{tabular}{c|c}
+
+   \includegraphics[scale=0.7, angle=90, origin=c]{images/inverse_hw/top_level_architecture_inverse.PNG}
+   \rotatebox[origin=c]{90}{ Figure~\thefigure: Top level architecture of the inverse module.}
+  %\caption{ \textbf{ROTATE}FSM controlling the architecture shown in Figure  } 
+  \end{tabular}
+  \label{fig:top_level_inverse}
+\end{figure}
+
+
+
+\subsection{Top level inverse FSM}
+The state machine for the inverse module shown in Figure \ref{fig:top_level_inverse} is shown in Figure \ref{fig:fsm_inverse_matrix}. Its possible states are explained in Table \ref{tab:fsm_inverse}.
+
+\begin{table}[H]
+\centering
+ \resizebox{1\textwidth}{!}
+{\begin{tabular}{l|l}
+State                                                                                    & Description                                                                                   \\
+\hline
+\textbf{Unknown state}                                                                   & An unknown state. The behaviour of the inverse module is unknown. The FSM should transition to state Idle.                                    \\
+\textbf{Idle}                                                                            & The inverse module is not performing any operations.                                          \\
+\textbf{\begin{tabular}[c]{@{}l@{}}Store\_correlation\_matrix\_\\ in\_BRAM\end{tabular}} & Writing data from correlation module to BRAMs. Two rows written to BRAMs per clock cycle.     \\
+\textbf{Forward\_elimination}                                                            & Computing the forward elimination of the Gauss-Jordan elimination as shown in Figure \ref{fig:gauss_jordan_pseudocode}.        \\
+\textbf{Backward\_elimination}                                                           & Computing the backward elimination of the Gauss-Jordan elimination as shown in Figure \ref{fig:gauss_jordan_pseudocode}.       \\
+\textbf{Last\_division}                                                                  & Computing the last division of the Gauss-Jordan elimination as shown in Figure \ref{fig:gauss_jordan_pseudocode}.              \\
+\textbf{Output\_inverse\_matrix}                                                         & Outputting the finished inverse matrix for the pixel. Two rows are outputted per clock cycle.
+\end{tabular}}
+\caption{States of the inverse FSM}
+\label{tab:fsm_inverse}
+
+\end{table}
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/inverse_hw/fsm_inverse_matrix.PNG}
+  \caption{FSM controlling the architecture shown in Figure \ref{fig:top_level_inverse}.  } 
+  \label{fig:fsm_inverse_matrix}
+\end{figure}
+
+The inverse module is controlled by the FSM shown in Figure \ref{fig:fsm_inverse_matrix}. 
+
+\subsection{Forward elimination}
+Forward elimination is defined as the operations trailing the   of the Gauss-Jordan elimination shown in Figure \ref{fig:gauss_jordan_pseudocode}.
+
+
+\begin{table}[H]
+\centering
+ \resizebox{1\textwidth}{!}
+{\begin{tabular}{l|l}
+State                                                                                    & Description                                                                                   \\
+\hline
+\textbf{Unknown state}                                                                   & An unknown state. The behaviour of the inverse module is unknown. The FSM should transition to state Idle.                                    \\
+\textbf{Idle}                                                                            & The forward elimination module is not performing any operations.                                          \\
+\textbf{Check\_diagonal\_element\_is\_zero} & Checking if element row\_i[index\_i]= 0 as done in Gauss-Jordan elimination shown in Figure \ref{fig:gauss_jordan_pseudocode}.     \\
+\textbf{Swap\_rows}                                                            & Swapping row\_i and row\_j of the matrix A as described in Figure \ref{fig:gauss_jordan_pseudocode}.        \\
+\textbf{Even\_j\_write}                                                           & Updating an even indexed row of the matrix A and $A^{-1}$(described in Figure \ref{fig:gauss_jordan_pseudocode}).       \\
+\textbf{Odd\_j\_write}                                                                  & Updating an odd indexed row of the matrix A and $A^{-1}$(described in Figure \ref{fig:gauss_jordan_pseudocode}).   
+\end{tabular}}
+\caption{States of the forward elimination FSM}
+\label{tab:fsm_forward_elimination}
+
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.4]{images/inverse_hw/fsm_forward_elimination.png}
+  \caption{FSM controlling the forward elimination state shown in Figure \ref{fig:fsm_inverse_matrix}.  } 
+  \label{fig:fsm_forward_elimination}
+\end{figure}
+
+
+\subsection{Backward elimination}
+
+\begin{table}[H]
+\centering
+ \resizebox{1\textwidth}{!}
+{\begin{tabular}{l|l}
+State                                                                                    & Description                                                                                   \\
+\hline
+\textbf{Unknown state}                                                                   & An unknown state. The behaviour of the inverse module is unknown. The FSM should transition to state Idle.                                    \\
+\textbf{Idle}                                                                            & The forward elimination module is not performing any operations.                                          \\
+\textbf{First\_elimination} & Checking if element row\_i[index\_i]= 0 as done in Gauss-Jordan elimination shown in Figure \ref{fig:gauss_jordan_pseudocode}.     \\
+\textbf{Odd\_i\_start}                                                            & Starting at a new iteration of the outermost loop of the backward elimination loop in the Gauss-Jordan elimination shown in  \ref{fig:gauss_jordan_pseudocode}. 
+\\
+&
+Starting at an odd row-index of the matrix. Computing A[row\_j] and $A^{-1}$[row\_j], which is at an even index. Updating matrices.       \\
+
+\textbf{Even\_i\_start}                                                            & Starting at a new iteration of the outermost loop of the backward elimination loop in the Gauss-Jordan elimination shown in  \ref{fig:gauss_jordan_pseudocode}.
+\\&
+Starting at an even row-index of the matrix. Computing A[row\_j] and $A^{-1}$[row\_j], which is at an odd index. Updating matrix.        \\
+
+\textbf{Even\_j\_write}                                                           & Updating an even indexed row of the matrix A and $A^{-1}$(described in Figure \ref{fig:gauss_jordan_pseudocode}).       \\
+\textbf{Odd\_j\_write}                                                                  & Updating an odd indexed row of the matrix A and $A^{-1}$(described in Figure \ref{fig:gauss_jordan_pseudocode}).   
+\end{tabular}}
+\caption{States of the forward elimination FSM}
+\label{tab:fsm_forward_elimination}
+
+\end{table}
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/inverse_hw/fsm_backward_elimination.PNG}
+  \caption{FSM controlling the backward elimination state shown in Figure\ref{fig:fsm_inverse_matrix}.  } 
+  \label{fig:fsm_backward_elimination}
+\end{figure}
+
+\subsection{Last division}
+
+\begin{table}[H]
+\centering
+ \resizebox{1\textwidth}{!}
+{\begin{tabular}{l|l}
+State                                                                                    & Description                                                                                   \\
+\hline
+\textbf{Unknown state}                                                                   & An unknown state. The behaviour of the inverse module is unknown. The FSM should transition to state Idle.                                    \\
+\textbf{Idle}                                                                            & The forward elimination module is not performing any operations.                                          \\
+
+
+\textbf{Even\_i\_write}                                                           & Updating an even indexed row of the matrix $A^{-1}$(described in Figure \ref{fig:gauss_jordan_pseudocode}).       \\
+\textbf{Odd\_i\_write}                                                                  & Updating an odd indexed row of the matrix $A^{-1}$(described in Figure \ref{fig:gauss_jordan_pseudocode}).   
+\end{tabular}}
+\caption{States of the last division FSM}
+\label{tab:fsm_last_division}
+
+\end{table}
+
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/inverse_hw/fsm_last_division.PNG}
+  \caption{FSM controlling the last\_division state shown in Figure \ref{fig:fsm_inverse_matrix}.  } 
+  \label{fig:fsm_last_division}
+\end{figure}
+
+\subsection{Memory hierarchy}
+The Gauss Jordan inverse requires two matrices to be stored in memory, the matrix $\textbf{A}$ and $\textbf{A}^{-1}$ as shown in Figure \ref{fig:gauss_jordan_pseudocode}. Both of these matrices will be of the same size as the correlation matrix, described in section \ref{sec:mem_management_correlation_matrix}. It is therefore not desirable to store these matrices in registers, but rather in BRAM. By having the same memory structure as described in section \ref{sec:mem_management_correlation_matrix}, using $P\_BANDS$ BRAM 36kbit blocks for each of the matrices, this will enable two rows to be written and read per clock cycle. 
+
+\subsection{Inverse pipeline stages}
+The inverse module is pipelined into four stages in order to achieve high throughput. The pipeline can be seen in Figure \ref{fig:pipeline_inverse_part_1}, \ref{fig:pipeline_inverse_part_2} and \ref{fig:pipeline_inverse_part_3}.
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/estimation_execution_time/pipeline_inverse_matrix_part_1.PNG}
+  \caption{Showing pipeline operations in the Store\_correlation\_matrix and Forward\_elimination states.  } 
+  \label{fig:pipeline_inverse_part_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/estimation_execution_time/pipeline_inverse_matrix_part_2.PNG}
+  \caption{Showing pipeline operations in the Forward\_elimination and Last\_division states.  } 
+  \label{fig:pipeline_inverse_part_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/estimation_execution_time/pipeline_inverse_matrix_part_3.PNG}
+  \caption{Showing pipeline operations in the Output\_inverse\_matrix state.  } 
+  \label{fig:pipeline_inverse_part_3}
+\end{figure}
+
+
+
+\subsection{Execution time expectations}
+Using $P\_BANDS$ BRAMs enables to read and write a maximum of two rows of each of the matrices $\textbf{A}$ and $\textbf{A}^{-1}$ per clock cycle.  Assuming that each of the row-operations in the Gauss-Jordan elimination can be calculated within one clock cycle, it is possible to do an estimation of the expected execution time for the anomaly detection. 
+
+
+
+%%\subsubsection{Inverse computation}
+%%Estimated execution time backward elimination:
+%%\begin{equation}
+%%    B=\sum_{i=1}^{i=P_{BANDS}-1} i
+%%\end{equation}
+
+
+\subsection{Adaptive shifting}
+\label{sec:adaptive_shifting}
+        To avoid using division the adaptive shifting approach shown in \ref{fig:adaptive_shifting} has been implemented. It approximates the divisor by an adaptive number of shift operations, as the divisor is not constant. To achieve this, the most significant bit(MSB) of the divisor is first checked to evaluate if the divisor is a negative number. If it is, the divisor is negated. The block \textbf{Find MSB} finds the MSB of the unsigned divisor. In parallel with this, $PIXEL\_DATA\_WIDTH*2-1$ numbers of shift operation processes shifts the unsigned divisor by $n\_shifts$=[1,2...$PIXEL\_DATA\_WIDTH*2-1$]. The remainders after shifting is sent to the \textbf{Choose best approximation} block. This block choose the best approximation depending upon the location of the MSB and the remainders after shifting. The best approximation to the divisor will be a shift operation by MSB or MSB+1 number of shifts. Each element of the row is then shifted in parallel to compute the approximate division in one clock cycle. If the divisor is a negative number, the row is negated before outputting data to register.
+
+
+The adaptive shifting will have an error of \textbf{FIND largest error.}. 
+
+%\textbf{Mention the fact that r\_i\_i\_half is added before dividing. This is because of integer rounding in hardware/vivado}
+
+
+\begin{figure}[H]
+\centering
+   \includegraphics[scale=0.5]{images/approximate_division/last_division.PNG}
+  \caption{Approaching real division with an adaptive number of shifts.  } 
+  \label{fig:adaptive_shifting}
+\end{figure}
