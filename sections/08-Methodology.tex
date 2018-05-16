@@ -12,7 +12,7 @@ To evaluate the performance of the ADs considered in this task, models of the al
 
 The MATLAB hyperspectral toolbox \cite{MATLAB_hyperspectral_toolbox} was used for image preprocessing, visualization and for having a good starting point for developing further functionality. The toolbox included an implementation of the RX algorithm. A fork of the toolbox was made, available at \cite{MATLAB_hyperspectral_toolbox_fork}, to be able to do MATLAB implementations of LRX, ALRX and ACAD in order to evaluate the performance of the ADs. The most important scripts and functions from the forked toolbox are also located in appendix \ref{appendice:MATLAB_hyperspectral}.
 \section{Experiments on Synthetic images testing}
-To make an objective analysis  of the considered ADs performance, synthetic hyperspectral images with known anomalies were created. The images contained anomalies of various sizes, to test the test-ADs ability to detect variably sized anomalies. A similar test is also done in \cite{global_and_local_rx}. Figure 7(a) in \cite{global_and_local_rx} shows that the RX algorithm was not able to detect anomalies in the third and four column (anomalous pixels made up of >50\% abundance of the anomaly signature). The LRX exhibit slightly better anomaly detection accuracy in this test.
+To make an objective analysis  of the considered ADs performance, synthetic hyperspectral images with known anomalies were created. The images contained anomalies of various sizes, to test the ADs ability to detect variably sized anomalies. A similar test is also done in \cite{global_and_local_rx}. Figure 7(a) in \cite{global_and_local_rx} shows that the RX algorithm was not able to detect anomalies in the third and four column (anomalous pixels made up of >50\% abundance of the anomaly signature). The LRX exhibit slightly better anomaly detection accuracy in this test.
 \\
 
 The purpose of the synthetic images used in this thesis was to get objective metrics of the performance of the evaluated ADs. Two different metrics are important in order to evaluate the performance of the ADs; $false\_anomalies$ and $\%correctly\_predicted\_anomalies$. These metrics are defined in equation \ref{eq:false_anomalies_metric} and \ref{eq:correctly_predicted_anomalies_metric}. The value $true\_anomalies$ is taken from the reference anomaly map created during the creation of the synthetic images. These values are important as they provide an objective metric to evaluate the performance of the ADs, something that can not be done with real hyperspectral image data, unless one posesses a reference anomaly map to the real image data, which the author has not been able to find.  
@@ -29,7 +29,7 @@ The purpose of the synthetic images used in this thesis was to get objective met
     \label{eq:correctly_predicted_anomalies_metric}
 \end{equation}
 
-Synthetic images with different image size and size of anomaly were created to evaluate the performance of the ADs. To be able to compare to the tests done on images with a size of 200x200 as described in chapter 5.5.1 in \cite{hsueh_master_thesis} by Hsueh, these tests were mimicked. The synthetic image can be seen in figure \ref{fig:hsueh_image}. In addition, synthetic images with size of 30 x 30 pixels were created with an anomalous panel of size 2x2 inserted into the center of the images. This image scene is labelled as $Sim30\_30AVIRIS$. The anomalous pixels are pure pixels with a spectral signature of Buddingtonite. These images has a background consisting of $33\%$ Alunite, $33\%$ Kalonite and $33\%$ Pyrope, extracted from the Cuprite image scene \cite{ground_truth_cuprite}. Such a generated synthetic image can be seen in Figure \ref{fig:synthetic_30_30}.
+Synthetic images with different image size and anomaly sizes were created to evaluate the performance of the ADs. To be able to compare to the tests done on images with a size of 200x200 as described in chapter 5.5.1 in \cite{hsueh_master_thesis} by Hsueh, these tests were mimicked. The synthetic image can be seen in figure \ref{fig:hsueh_image}. In addition, synthetic images with size of 30 x 30 pixels were created with an anomalous panel of size 2x2 inserted into the center of the images. This image scene is labelled as $Sim30\_30AVIRIS$. The anomalous pixels are pure pixels with a spectral signature of Buddingtonite. These images has a background consisting of $33\%$ Alunite, $33\%$ Kalonite and $33\%$ Pyrope, extracted from the Cuprite image scene \cite{ground_truth_cuprite}. Such a generated synthetic image can be seen in Figure \ref{fig:synthetic_30_30}.
 
 
 \begin{figure}[H]
@@ -118,7 +118,7 @@ Since the RX AD does not build an anomaly map, the author defines anomalous pixe
 
 
 \caption{RX AD test on synthetic image based on Hsueh's description. The map in (b) was created to provide a way of computing $false\_anomalies$ and $ \%correctly\_predicted\_anomalies$.  }
-\label{fig:hsueh_image}
+\label{fig:hsueh_image_RX_test}
 \end{figure}
 
 The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = $0.3714$ for this test.
@@ -157,9 +157,9 @@ To evaluate the performance of the ADs considered in this task they were tested 
 
 \begin{figure}[H]
 
-\hbox{\hspace*{-2cm}                                                           
+\hbox{\hspace*{-1cm}                                                           
 
-   \includegraphics[scale=0.3]{images/AD_testing/original_band_220_22_1.png}}
+   \includegraphics[scale=0.65]{images/AD_testing/original_band_220_22_1.png}}
   \caption{Spectral band 220 from the hyperspectral data set of the Cuprite site\cite{Cuprite_data}. } 
   \label{fig:cuprite_scene_band_220}
 \end{figure}
@@ -178,6 +178,7 @@ As described in section \ref{sec:RX_theory}, the RX algorithm computes the covar
 \end{figure}
 
 
+
 \subsection{LRX}
 LRX computes the correlation matrix on a pixel vector block of size $K$ in order to detect anomalous pixel vectors, as described in section \ref{sec:LRX_theory}. 
 
@@ -185,11 +186,12 @@ LRX computes the correlation matrix on a pixel vector block of size $K$ in order
 
 \hbox{\hspace*{-2cm}                                                           
 
-   \includegraphics[scale=0.3]{images/AD_testing/hyperspectral_images/real_images/K=25_using_gauss_jordan_colormap_jet.png}}
+   \includegraphics[scale=0.6]{images/AD_testing/hyperspectral_images/real_images/K=25_using_gauss_jordan_colormap_jet.png}}
   \caption{Result from LRX AD with a kernel size of K=25 on Cuprite image scene 02. Higher score indicates higher probability of the pixel being anomalous. } 
   \label{fig:cuprite_scene_band_220}
 \end{figure}
 
+\subsection{ALRX}
 
 \subsection{ACAD}
 
@@ -203,3 +205,24 @@ ACAD is causal and computes the correlation matrix on a casual data set, back to
   \label{fig:cuprite_scene_band_220}
 \end{figure}
  
+ \subsection{Choice of anomaly detector algorithm}
+ 
+ \begin{table}[H]
+\centering
+ \resizebox{1.1\textwidth}{!}
+{\begin{tabular}{l|l|l|l|l|l}
+\textbf{AD}    & \textbf{$false\_anomalies$} &\textbf{ $\%correctly\_predicted\_$} &\textbf{Performance on} & \textbf{Possibility of}  & \textbf{Degree of}                          \\
+& & \textbf{$anomalies$}& \textbf{real data}& \textbf{implementing in real time} &\textbf{parallelism}\\
+\hline
+RX & Hsueh :0&Hsueh: 0.3714 & Medium&Low. Need global covariance &Low.Need global covariance \\
+&$Sim30\_30AVIRIS:0$ & $Sim30\_30AVIRIS$ : 1 &  & matrix before computing&matrix before computing \\
+&$Sim\_Aviris01:0$ & $Sim\_Aviris01$ : 1 & & inverse. & inverse. This matrix must \\
+& & & & &be computed in series.\\
+LRX & & & & & \\
+ALRX & & & & & \\
+ACAD & & & & & \\
+\end{tabular}}
+\caption{Comparison of different anomaly detectors}
+\label{tab:ad_comparison}
+
+\end{table}

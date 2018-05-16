@@ -1,7 +1,9 @@
 \newpage
 \chapter{Hardware implementation}
 \label{sec:implementation}
-The following chapter describes the implementation of the ACAD anomaly detector on a Zynq Z-7030 device.
+The following chapter describes the implementation of the ACAD anomaly detector on a Zynq Z-7030 or Z-7035 device, used for the NTNU Smallsat project. \\
+ 
+ A prototype version should be tested on the ZedBoard Zynq Evaluation and Development Kit, having a Z-7020 device.
 
 
 \section{Top level architecture}
@@ -97,7 +99,7 @@ Figure \ref{fig:update_time_correlation_BRAM} shows the total time spent updatin
 
 \section{ACAD correlation}
 \label{sec:correlation_hw}
-The \textbf{ACAD correlation module}, as shown in Figure \ref{fig:top_level_ACAD}, is responsible for computing the ACAD correlation matrix $\Tilde{\textbf{R}}_{k x k}(\textbf{x}).
+The \textbf{ACAD correlation module}, as shown in Figure \ref{fig:top_level_ACAD}, computes the ACAD correlation matrix $\Tilde{\textbf{R}}_{k x k}(\textbf{x}).
 \\
 
 As the SmallSat project is in the early phases, the value of $p$ for the data inputted to the AD from preprocessing steps are insecure. Another insecurity is the performance of the ACAD AD using PCA pre-processing, i.e. reducing the number of spectral bands in the AD. In addition, the ACAD AD requires storing of the inverse matrix, and the sum of anomaly detected. This is shown in figure X ( insert a figure showing the equation and what needs to be stored where). It is therefore not desirable to store the entire correlation matrix in flip flops, as there will be a need for storing other matrices, either in BRAM or DRAM, thereby inserting a bottleneck in the pipeline relative to the flip flop-updating step. Using BRAMs it is also possible to make a scalable solution for both small and large $p$. 
@@ -167,17 +169,22 @@ Pixel data inputted to the correlation module is inputted as a horizontal vector
 
 \section{Inverse computation}
 \label{sec:inverse_computation_hw}
-Due to its low complexity, the Gauss-Jordan elimination was chosen to compute the inverse. A drawback with this algorithm is that it uses division. Division is an operation that is computationally intensive in hardware, and requires a large amount of logic to be implemented. An early implementation of the Gauss-Jordan elimination by the author included the use of real division. This approach utilized $P\_BANDS$ numbers of divisions, to ensure that one row of the inverse matrix could be computed in one clock cycle. The inner loop operation of forward and backward elimination in Figure \ref{fig:gauss_jordan_pseudocode} for this approach is shown in Figure.  A scaling problem became apparent, as this approach utilized too many LUTs as functions.  This is showed in the results, section \ref{sec:synthesis:luts_and_registers_inverse}. 
-Another approach was made, \textbf{INSERT figures here}..
+Due to its low complexity, the Gauss-Jordan elimination was chosen to compute the inverse. A drawback with this algorithm is that it uses division. Division is an operation that is computationally intensive in hardware, and requires a large amount of logic to be implemented. An early implementation of the Gauss-Jordan elimination by the author included the use of the division operator "/". This is further described in Section \ref{sec:division_operator}.
 
-An approach to avoid division by adaptive shifting as described in section \ref{sec:adaptive_shifting}. 
 
-\begin{figure}[H]
-\centering
-   \includegraphics[scale=0.5]{images/inverse_approach_P_BANDS_divisions/inverse_core_old_approach.PNG}
-  \caption{Architecture showing the first approach to implementing the forward and backward inner loop operation from Figure \ref{fig:gauss_jordan_pseudocode}. $P\_BANDS$ modules marked by the dotted border was synthesized.  } 
-  \label{fig:inverse_P_BANDS_number_of_divisions}
-\end{figure}
+%This approach utilized $P\_BANDS$ numbers of divisions, to ensure that one row of the inverse matrix could be computed in one clock cycle. The inner loop operation of forward and backward elimination in Figure \ref{fig:gauss_jordan_pseudocode} for this approach is shown in Figure .  A scaling problem became apparent, as this approach utilized too many LUTs as functions.  This is showed in the results, section \ref{sec:synthesis:luts_and_registers_inverse}. 
+%Another approach was made, \textbf{INSERT figures here}..
+
+An approach to implement division by adaptive shifting is described in Section \ref{sec:adaptive_shifting}. 
+
+A third approach for computing division was made. This approach utilizes a large number of LUTs. It is further described in Section \ref{sec:LUT_division}.
+
+%%\begin{figure}[H]
+%%\centering
+%%   \includegraphics[scale=0.5]{images/inverse_approach_P_BANDS_divisions/inverse_core_old_approach.PNG}
+%%  \caption{Architecture showing the first approach to implementing the forward and backward inner loop operation from Figure \ref{fig:gauss_jordan_pseudocode}. $P\_BANDS$ modules marked by the dotted border was synthesized.  } 
+%%  \label{fig:inverse_P_BANDS_number_of_divisions}
+%%\end{figure}
 
 
 \subsection{Top level architecture}
@@ -300,7 +307,7 @@ Starting at an even row-index of the matrix. Computing A[row\_j] and $A^{-1}$[ro
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.5]{images/inverse_hw/fsm_backward_elimination.PNG}
-  \caption{FSM controlling the backward elimination state shown in Figure\ref{fig:fsm_inverse_matrix}.  } 
+  \caption{FSM controlling the backward elimination state shown in Figure \ref{fig:fsm_inverse_matrix}.  } 
   \label{fig:fsm_backward_elimination}
 \end{figure}
 
@@ -333,7 +340,7 @@ State                                                                           
 \end{figure}
 
 \subsection{Memory hierarchy}
-The Gauss Jordan inverse requires two matrices to be stored in memory, the matrix $\textbf{A}$ and $\textbf{A}^{-1}$ as shown in Figure \ref{fig:gauss_jordan_pseudocode}. Both of these matrices will be of the same size as the correlation matrix, described in section \ref{sec:mem_management_correlation_matrix}. It is therefore not desirable to store these matrices in registers, but rather in BRAM. By having the same memory structure as described in section \ref{sec:mem_management_correlation_matrix}, using $P\_BANDS$ BRAM 36kbit blocks for each of the matrices, this will enable two rows to be written and read per clock cycle. 
+The Gauss Jordan inverse requires two matrices to be stored in memory, the matrix $\textbf{A}$ and $\textbf{A}^{-1}$ as shown in Figure \ref{fig:gauss_jordan_pseudocode}. Both of these matrices will be of the same size as the correlation matrix, described in section \ref{sec:mem_management_correlation_matrix}. It is therefore not desirable to store these matrices in registers, but rather in BRAM. By having the same memory structure as described in section \ref{sec:mem_management_correlation_matrix}, using $P\_BANDS$ BRAM 36kbit blocks for each of the matrices, this will enable two rows of each matrix to be written and read per clock cycle. 
 
 \subsection{Inverse pipeline stages}
 The inverse module is pipelined into four stages in order to achieve high throughput. The pipeline can be seen in Figure \ref{fig:pipeline_inverse_part_1}, \ref{fig:pipeline_inverse_part_2} and \ref{fig:pipeline_inverse_part_3}.
@@ -355,27 +362,100 @@ The inverse module is pipelined into four stages in order to achieve high throug
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.5]{images/estimation_execution_time/pipeline_inverse_matrix_part_3.PNG}
-  \caption{Showing pipeline operations in the Output\_inverse\_matrix state.  } 
+  \caption{Showing pipeline operations in the $Output\_inverse\_matrix$ state.  } 
   \label{fig:pipeline_inverse_part_3}
 \end{figure}
 
 
 
 \subsection{Execution time expectations}
-Using $P\_BANDS$ BRAMs enables to read and write a maximum of two rows of each of the matrices $\textbf{A}$ and $\textbf{A}^{-1}$ per clock cycle.  Assuming that each of the row-operations in the Gauss-Jordan elimination can be calculated within one clock cycle, it is possible to do an estimation of the expected execution time for the anomaly detection. 
+Using $P\_BANDS$ BRAMs enables to read and write a maximum of two rows of each of the matrices $\textbf{A}$ and $\textbf{A}^{-1}$ per clock cycle.  Assuming that each of the row-operations in the Gauss-Jordan elimination can be calculated within one clock cycle, it is possible to do an estimation of the expected execution time in clock cycles for the inverse computation per pixel. \\
+
+Expected execution time for the different states is shown in Figure \ref{fig:pipeline_inverse_part_1}, \ref{fig:pipeline_inverse_part_2} and \ref{fig:pipeline_inverse_part_3}. For state $Forward\_elimination$, the execution time will be greater if it is necessary to swap rows, shown by the state $SWAP\_ROWS$ in Figure \ref{fig:fsm_forward_elimination}. The worst case execution time of $Forward\_elimination$ is assumed to be when the first element of the matrix $\textbf{A}$ has a zero element at row(i,i) and all other rows,except the last row, has a zero element at row(j,j). \\
+
+A worst case and a best case execution time, $inv\_worst\_case$ and $inv\_best\_case$, for the computation of the inverse per pixel is then estimated. The estimations are shown in Equation \ref{eq:inv_worst_case} and \ref{eq:inv_best_case}.$N\_STATES\_INV$ is the number of valid states in the inverse top level module, shown in Figure \ref{fig:fsm_inverse_matrix}. $worst\_case\_ex\_state$ is the set of expected worst case execution times for the states.  $best\_case\_ex\_state$ is the set of expected best case execution times for the states. 
+
+\begin{equation}
+\begin{split}
+inv\_worst\_case & = \sum_{i=0}^{N\_STATES\_INV}worst\_case\_ex\_state(i) \\
+& =\underbrace{\frac{P\_BANDS}{2} }_\text{STORE\_CORRELATION\_MATRIX}  + \overbrace{\sum_{i=0}^{P\_BANDS-1}i + P\_BANDS}^\text{STATE\_FORWARD\_ELIMINATION} \\
+& + \underbrace{\sum_{i=0}^{P\_BANDS-1}i}_\text{STATE\_BACKWARD\_ELIMINATION}  
+ +
+\overbrace{P\_BANDS}^\text{LAST\_DIVISION} + \underbrace{P\_BANDS/2}_\text{OUTPUT\_INVERSE\_MATRIX}\\
+& = 3P\_BANDS + 2\sum_{i=0}^{P\_BANDS-1}i
+\end{split}
+\label{eq:inv_worst_case}
+\end{equation}
 
 
+\begin{equation}
+\begin{split}
+inv\_best\_case & = \sum_{i=0}^{N\_STATES\_INV}best\_case\_ex\_state(i) \\
+& = \underbrace{\frac{P\_BANDS}{2} }_\text{STORE\_CORRELATION\_MATRIX}  + \overbrace{\sum_{i=0}^{P\_BANDS-1}i }^\text{STATE\_FORWARD\_ELIMINATION} \\
+& + \underbrace{\sum_{i=0}^{P\_BANDS-1}i}_\text{STATE\_BACKWARD\_ELIMINATION}  
+ +
+\overbrace{P\_BANDS}^\text{LAST\_DIVISION} + \underbrace{P\_BANDS/2}_\text{OUTPUT\_INVERSE\_MATRIX}\\
+& = 2P\_BANDS + 2\sum_{i=0}^{P\_BANDS-1}i
+\end{split}
+\label{eq:inv_best_case}
+\end{equation}
 
+Figure \ref{fig:estimated_time_inverse} shows the estimated execution time in seconds for computing the inverse for all pixels in the hyperspectral image, for an image size of 1088x576. 
+
+\begin{figure}[H]
+\hbox{\hspace*{-3cm}                                                           
+
+   \includegraphics[scale=0.4]{images/estimated_execution_time_inverse_computation_in_seconds.png}}
+  \caption{Estimated execution time for inverse matrix computation for an image of 1088x576, in seconds. The horizontal line marks the 54 second processing specification set by the SmallSat project.  } 
+  \label{fig:estimated_time_inverse}
+\end{figure}
 %%\subsubsection{Inverse computation}
 %%Estimated execution time backward elimination:
 %%\begin{equation}
 %%    B=\sum_{i=1}^{i=P_{BANDS}-1} i
 %%\end{equation}
 
+\subsection{Division}
+\label{sec:division_implementation}
+This section describes the implementation of division used in the Gauss-Jordan elimination.  The semantics used to described the division operation will be $C=B*\frac{1}{A}$ where $C,B$ and $A $ are integer variables. This corresponds to the inner loop operation for Last division shown in Figure \ref{fig:gauss_jordan_pseudocode}.
 
-\subsection{Adaptive shifting}
+
+\subsubsection{Using division operator "/"}
+\label{sec:division_operator}
+
+
+
+%%\begin{figure}[H]
+%%\centering
+%%   \includegraphics[scale=0.5]{images/inverse_hw/inverse_core_division_approach.PNG}
+%%  \caption{Architecture of the \textbf{Elimination core} in Figure \ref{fig:top_level_inverse}, using division operator "/" for integer datatype in VHDL. $k$= $P\_BANDS$ modules marked by the dotted square is implemented in order to compute one row per clock cycle.  } 
+%%  \label{fig:adaptive_shifting}
+%%\end{figure}
+
+To evaluate if division could be implemented by using the "/" operator, the $\textbf{Last division}$ block was synthesized, and the critical path evaluated, to see if the timing specification of 100 MHz operating frequency could be met. Results for different divisor -and-divident bit width is presented in Table \ref{tab:division_operator_logic_delays}. 
+
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c|c}
+    \textbf{Bit width divisor and dividend} &\textbf{Logic delay[ns]}&\textbf{Max frequency[MHz] } \\
+         32&72.498 &13.79 \\
+         13 &19.726 &50.69\\
+         10 & 16.032&62.37 \\
+         8 & 12.74&78.49 \\
+         6&9.530& 104.93\\
+         
+    \end{tabular}
+    \caption{Synthesis results for ZedBoard Zynq Evaluation and Development Kit Z7020 for \textbf{Last division} shown in Figure \ref{fig:top_level_inverse}, implementing the product $C= B*\frac{1}{A}$. Bit width for factor $B$ is 32 bit.}
+    \label{tab:division_operator_logic_delays}
+\end{table}{}
+%% Insert table here, with widths and delays
+
+\subsubsection{Adaptive shifting}
 \label{sec:adaptive_shifting}
-        To avoid using division the adaptive shifting approach shown in \ref{fig:adaptive_shifting} has been implemented. It approximates the divisor by an adaptive number of shift operations, as the divisor is not constant. To achieve this, the most significant bit(MSB) of the divisor is first checked to evaluate if the divisor is a negative number. If it is, the divisor is negated. The block \textbf{Find MSB} finds the MSB of the unsigned divisor. In parallel with this, $PIXEL\_DATA\_WIDTH*2-1$ numbers of shift operation processes shifts the unsigned divisor by $n\_shifts$=[1,2...$PIXEL\_DATA\_WIDTH*2-1$]. The remainders after shifting is sent to the \textbf{Choose best approximation} block. This block choose the best approximation depending upon the location of the MSB and the remainders after shifting. The best approximation to the divisor will be a shift operation by MSB or MSB+1 number of shifts. Each element of the row is then shifted in parallel to compute the approximate division in one clock cycle. If the divisor is a negative number, the row is negated before outputting data to register.
+        To avoid using the division operator the adaptive shifting approach shown in \ref{fig:adaptive_shifting} has been implemented. It approximates the divisor by an adaptive number of shift operations, as the divisor is not constant. To achieve this, the most significant bit(MSB) of the divisor is first checked to evaluate if the divisor is a negative number. If it is, the divisor is negated. The block \textbf{Find MSB} finds the MSB of the unsigned divisor. In parallel with this, $PIXEL\_DATA\_WIDTH*2-1$ numbers of shift operation processes shifts the unsigned divisor by $n\_shifts$=[1,2...$PIXEL\_DATA\_WIDTH*2-1$]. The remainders after shifting is sent to the \textbf{Choose best approximation} block. This block choose the best approximation depending upon the index of the MSB and the remainders after shifting. The best approximation to the divisor will be a shift operation by MSB or MSB+1 number of shifts. Each element of the row is then shifted in parallel to compute the approximate division in one clock cycle. If the divisor is a negative number, the row is negated before outputting data to register.
+        \\
+        The design shown in Figure \ref{fig:adaptive_shifting} was synthesized for Zedboard Zynq Evaluation and Development kit Z7020 to check timing. The max logic delay was $6.932$ns which gives a max operating frequency of 144.25 MHz, not accounting for net delay. 
 
 
 The adaptive shifting will have an error of \textbf{FIND largest error.}. 
@@ -386,6 +466,32 @@ The adaptive shifting will have an error of \textbf{FIND largest error.}.
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.5]{images/approximate_division/last_division.PNG}
-  \caption{Approaching real division with an adaptive number of shifts.  } 
+  \caption{Architecture of block \textbf{Last division}, approaching division with an adaptive number of shifts.   } 
   \label{fig:adaptive_shifting}
+\end{figure}
+
+
+\subsubsection{LUT approach}
+\label{sec:LUT_division}
+Instead of computing the division in the operation $C= B*\frac{1}{A}$, an approach based on the solution in \cite{cite:how_to_implement_division} was made. The approach utilizes LUTs to store the array $divisor\_inv$=$\frac{2^{DIV\_PRECISION}}{A}$, where $A=1,2...2^{DIV\_PRECISION}$ and $DIV\_PRECISION$ is the bit width of the divisor and the dividend. Instead of dividing by an integer $A$, $A$ is used as an index to look up in LUTs(number of LUTs depending upon $DIV\_PRECISION$) storing the $divisor\_inv$. $divisor\_inv(A)$ is then multiplied by $B$, which yields product $C$. $C$ is then right shifted $DIV\_PRECISION$ spaces. This can be seen in Equation \ref{LUT_operations}.
+
+\begin{equation} \label{LUT_operations}
+\begin{split}
+C= shift\_right(B*\frac{2^{DIV\_PRECISION}}{A},DIV\_PRECISION)
+\end{split}
+\end{equation}
+
+The code for inferring the LUTs for storage of $divisor\_inv$ is shown in Listing \ref{lst:lut_division}, examplified for DIV\_PRECISION=4.  
+
+\lstinputlisting[caption={LUT division approach examplified for DIV\_PRECISION = 4.},label={lst:lut_division},style=customc]{code/lut_4_bit_example.vhd}
+
+The architecture of the \textbf{Last division} block, utilizing this LUT approach, is shown in figure \ref{fig:top_last_division_lut_approach}. If choosing $DIV\_PRECISION$< $PIXEL\_DATA\_WIDTH*2$, an adaptive shifting approach is utilized. 
+\\
+
+\begin{figure}[H]
+\hbox{\hspace*{-2cm}                                                           
+
+   \includegraphics[scale=0.45]{images/approximate_division/top_last_division_lut_approach_dataflow.PNG}}
+  \caption{Architecture of block \textbf{Last division}, computing division using the LUT approach.   } 
+  \label{fig:top_last_division_lut_approach}
 \end{figure}

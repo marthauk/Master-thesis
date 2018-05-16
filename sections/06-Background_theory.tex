@@ -17,7 +17,7 @@ The process of detecting anomalies in a hyperspectral image is called anomaly de
 
 The above-mentioned issues are important for the choice of anomaly detection algorithm, and will be further discussed in this chapter.
 \\
-Algorithms used for anomaly detection outputs the probability that the spectral pixel vector is an anomaly. A higher output indicates a higher probability for the pixel vector being an anomaly.
+Algorithms used for anomaly detection outputs a scalar for each pixel in an image indicating the probability that the spectral pixel vector is an anomaly. A higher output indicates a higher probability for the pixel vector being an anomaly.
 %\subsection{Background compression}
 % See book
 
@@ -57,7 +57,7 @@ An often used and important variant of the RX algorithm is the local RX(LRX) alg
 \subsection{Adaptive Causal Anomaly Detection}
 \label{sec:ACAD_theory}
 An variant of the RX AD is the Adaptive Causal Anomaly detection (ACAD) \cite{chang2006characterization}. One issue of the RX algorithm is that previously detected anomalies with strong spectral signatures may have an impact upon the detection of later anomalies, as they may influence what is consider the background. This is shown in \cite{chang2006characterization}. ACAD is adaptive in the way that it builds a map of detected anomalies, and removes the previously detected anomaly pixel vectors from the causal sample correlation set. \\
-Another benefit of ACAD relative to RX and LRX is that it is real-time. This is achieved by using the causal correlation matrix $\textbf{R}$($\textbf{x}$), defined in equation \ref{eq:caus_corr}, instead of the covariance or the correlation matrix computed on the global or a local set of pixel vectors, as in RX and LRX, respectively. In equation \ref{eq:caus_corr} $\textbf{x}$ is the observation test pixel vector, and $k$ is the index of the pixel vector currently being processed. The sum in equation \ref{eq:caus_corr} sums the correlation matrix for the pixel sample vectors {$\textbf{x}_1$, ....$\textbf{x}_k$}.  
+Another benefit of ACAD relative to RX and LRX is that it may be computed in real-time. This is achieved by using the causal correlation matrix $\textbf{R}$($\textbf{x}$), defined in equation \ref{eq:caus_corr}, instead of the covariance or the correlation matrix computed on the global or a local set of pixel vectors, as in RX and LRX, respectively. In equation \ref{eq:caus_corr} $\textbf{x}$ is the observation test pixel vector, and $k$ is the index of the pixel vector currently being processed. The sum in equation \ref{eq:caus_corr} sums the correlation matrix for the pixel sample vectors {$\textbf{x}_1$, ....$\textbf{x}_k$}.  
 
 \begin{equation}
     \textbf{R}(\textbf{x}_k)=\frac{1}{k}\sum_{i=1}^k\textbf{x}_i\textbf{x}_i^T
@@ -79,7 +79,7 @@ ACAD can then be defined as in equation \ref{eq:ACAD}.
     \label{eq:ACAD}
 \end{equation}
 
-ACAD is a causal filter, meaning that only the pixels previosly processed are used for anomaly detection.  It computes the correlation matrix for the previously captured pixel sample vector {$\textbf{x}_1$, ....$\textbf{x}_k$} up to the pixel currently being processed, $k$, as shown in equation \ref{eq:caus_corr}. This means that ACAD might be implemented in real-time and near-real time, seeing as pixels can be processed as soon as they are captured by the push-broom HSI and the AD does not need to wait for the entire image to be loaded into memory. \\
+ACAD is a causal filter, meaning that only the pixels previously processed are used for anomaly detection.  It computes the correlation matrix for the previously captured pixel sample vector {$\textbf{x}_1$, ....$\textbf{x}_k$} up to the pixel currently being processed, $k$, as shown in Equation \ref{eq:caus_corr}. This means that ACAD might be implemented in real-time and near-real time, seeing as pixels can be processed as soon as they are captured by the push-broom HSI and the AD does not need to wait for the entire image to be loaded into memory. \\
 
 An anomalous pixel vector have a significant spectral vector difference from its surroundings. Since ACAD is causal, the surroundings is defined as the $n_{ACAD}$ previously processed pixels. %To evaluate if a spectral vector is anomalous,
 ACAD defines the variable $u_k$, shown in equation \ref{eq:u_k}. $u_k$ is used to be able to evaluate if a pixel vector is anomalous. 
@@ -157,7 +157,9 @@ In equation \ref{eq:ALRX_anomaly_removed} $\Delta(k_{KxK})$ is the set of previo
 \section{Inverse matrix}
 Computing the inverse of a matrix is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization\cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
 
-Another option to implement the inverse function is by doing Gauss-Jordan elimination. The Gauss-Jordan elimination is simpler to implement in HW than the method of QR-factorization method. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. 
+Another option to implement the inverse function is by doing Gauss-Jordan elimination. The Gauss-Jordan elimination is less complex to implement in Hardware than QR-decomposition. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. A pseudocode for computing the Gauss-Jordan elimination is shown in Figure \ref{fig:gauss_jordan_pseudocode}.
+
+%The Gauss-Jordan elimination is simpler to implement in HW than the method of QR-factorization method
 
 %\subsection{QR-Factor}
 
@@ -177,7 +179,7 @@ Another option to implement the inverse function is by doing Gauss-Jordan elimin
 
 \begin{figure}[H]
 \centering
-   \includegraphics[scale=0.6]{images/gauss_jordan_pseudocode.png}
-  \caption{ Pseudocode for computing the inverse of a matrix by Gauss-Jordan elimination \cite{gauss_jordan_fpga}. The code can be divided into three parts; forward elimination, marked by black square, backward elimination, marked by red square and last divison, marked by green square. } 
+   \includegraphics[scale=0.8]{images/gauss_jordan_pseudocode.png}
+  \caption{ Pseudo-code for computing the inverse of a matrix by Gauss-Jordan elimination \cite{gauss_jordan_fpga}. The code can be divided into three parts; forward elimination; marked by black square, backward elimination; marked by red square and last division; marked by green square. } 
   \label{fig:gauss_jordan_pseudocode}
 \end{figure}
