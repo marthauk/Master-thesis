@@ -13,13 +13,7 @@ This master thesis is part of the NTNU SmallSat \cite{SmallSat_project_descripti
   \label{fig:HSI_concept}
 \end{figure}
 
-The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands, $N_{bands}$, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per line/row in the image. The number of pixel rows,$N_{rows}$ is 1088. The hyperspectral imagers operation can be seen in Figure \ref{fig:HSI_functionality}. 
-\begin{figure}[H]
-\centering
-   \includegraphics[scale=0.3]{images/hyperspectral_imager.PNG}
-  \caption{ Push-broom hyperspectral imager mode of operation. The imager captures data one pixel at the time, in a row-wise fashion \cite{SmallSat_project_description}. } 
-  \label{fig:HSI_functionality}
-\end{figure}
+
 \\
 
 NTNU SmallSat aims to use this information to detect algae blooms, phytoplankton, oil spills, microplastic and possibly other irregularities or \textit{anomalies} in the ocean. Detection of harmful algae blooms (HABs) is particularly interesting for the salmon farms located along the coast of Norway, as such blooms can be toxic, even deadly, for the salmon. Algaes were most likely the cause of death for 38 000 salmons in southern Troms in September of 2017 \cite{laksedeath}. An image of such a bloom can be seen in Figure \ref{fig:algae_bloom_troms}. Increasing ocean temperatures as a consequence of global warming may lead to more frequent and intense HABs \cite{climate_change_algae_blooms}. 
@@ -61,11 +55,12 @@ Chapter \ref{sec:theory} is the Theory section.  Algorithms considered used for 
 
 Chapter \ref{chapter:review_anomaly_detectors} contains the review of the considered ADs presented in chapter \ref{sec:theory}. In this section tests of the different anomaly-detectors has been done in MATLAB on synthetic images and on real image data from the Cuprite scene.\\  
 
+In Chapter \ref{sec:implementation} the hardware implementation of the AD is described. The architecture is presented, along with different design considerations. 
+
+\\
 
 Chapter \ref{sec:results} is the Results section. This section contains synthesis results, simulation results and results from testing on HW.
 \\
-
-In Chapter \ref{sec:implementation} the hardware implementation of the AD is described. The architecture is presented, along with different design considerations. 
 
 Chapter \ref{sec:Discussion} is the Discussion section. 
 \\

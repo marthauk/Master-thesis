@@ -2,99 +2,141 @@
 \chapter{Hardware implementation}
 \label{sec:implementation}
 The following chapter describes the implementation of the ACAD anomaly detector on a Zynq Z-7030 or Z-7035 device, used for the NTNU Smallsat project. \\
- 
- A prototype version should be tested on the ZedBoard Zynq Evaluation and Development Kit, having a Z-7020 device.
-
-
-\section{Top level architecture}
-
-The top level architecture of the ACAD Anomaly detector is shown in Figure \ref{fig:top_level_ACAD}. It consists of five blocks; \textbf{FSM ACAD}, \textbf{Shiftregister\_four\_bands}, \textbf{ACAD correlation module}, \textbf{ACAD inverse module Gauss Jordan} and \textbf{dACAD module}.
-
-\begin{figure}[H]
-\refstepcounter{figure}
-\begin{tabular}{c|c}
-
-   \includegraphics[scale=0.6, angle=90, origin=c]{images/acad_top_level.PNG}
-   \rotatebox[origin=c]{90}{ Figure~\thefigure: Top level architecture of the ACAD anomaly detector.}
-  %\caption{ \textbf{ROTATE}FSM controlling the architecture shown in Figure  } 
-  \end{tabular}
-  \label{fig:top_level_ACAD}
-\end{figure}
 
 \section{Memory considerations}
 \label{sec:memory_management}
-    As the ACAD anomaly detector is to be implemented on a Zynq Z-7030 or Z-7035 device, care must be taken when designing, with respect to logic and memory usage. As the hyperspectral image data inputted to the AD might have $P\_BANDS$=100, with 16-bit image data per spectral band, memory usage is an important consideration.   
+    As the ACAD anomaly detector is to be implemented on a Zynq Z-7030 or Z-7035 device, care must be taken when designing, with respect to logic and memory usage.The hyperspectral image data inputted to the AD might have number of spectral bands, $P\_bands$ =$N\_bands$, depending upon if preprocessing steps such as Principel Component Analysis(PCA) is done on the image cube. Pixel data width per spectral band, $Pixel\_data\_width$ is 16-bit. The size of $P\_bands$ and $Pixel\_data\_width$ makes memory usage an important consideration.
 
-\subsection{Correlation matrix}
+\subsection{Storing and updating of matrices in ACAD }
 \label{sec:mem_management_correlation_matrix}
-Storing and updating the causal correlation matrix sum as shown in equation \ref{eq:caus_corr} requires a lot of memory resources. This update needs to be done for each pixel in the image, and the memory used for this operation is therefore important in order to make the AD real-time. The size of the correlation matrix will be $p * p$, where $p$ is the number of spectral bands in the image. As mentioned, the number of usable bands $N_{bands}$ is 100. The image pixel data width, $pixel\_data\_width$ is assumed to be 16 bit/band/pixel. As the correlation matrix is the product of $\textbf{x}$ * $\textbf{x}^T$ the resulting correlation pixel width will be 2* $pixel\_data\_width$. Using spectral information from all the bands would require $p * p * 32$= $100$ *$100$ *$32$ bit = $320 kbit$ of memory storage. 
+The ACAD algorithm requires storage of the following matrices :$\textbf{R(x}_k)$, $\Tilde{\textbf{R}}(\textbf{x}_k)$ and $\sum_{t_j\in\Delta(k)}\textbf{t}_j\textbf{t}_j^T$. In addition the matrix $A$ and $A^{-1}$ used in Gauss-Jordan elimination shown in Figure \ref{fig:matrix_A_and} must be stored in memory. These are $P\_bands$ $\times$ $P\_bands$ sized matrices. 
+
+\begin{figure}[H]
+\centering                                                              \includegraphics[scale=0.9]{images/matrix_A_and_inv.PNG}
+  \caption{Matrix $A$ and $A^{-1}$ used in Gauss-Jordan elimination.} 
+  \label{fig:matrix_A_and}.
+\end{figure}
+
+Storing and updating matrices of size $P\_bands$ $\times$ $P\_bands$  requires a lot of memory resources. %the causal correlation matrix sum as shown in equation \ref{eq:caus_corr} requires a lot of memory resources. 
+One of the matrices is the causal correlation matrix $\textbf{R(x}_k)$. Update of this matrix needs to be done for each pixel in the image, and the memory used for this operation is therefore important in order to make the AD real-time.  As $\textbf{R(x}_k)$ is the product of $\textbf{x}$ $\times$ $\textbf{x}^T$ the resulting data width will be 2$\times$ $Pixel\_data\_width$. Using spectral information from all the bands would require $P\_bands$ $\times$ $P\_bands$ $\times$ $32$ $=$ $100$ $\times$ $100$ $\times$ $32$ bit = $320 kbit$ of memory storage. 
 \\
 
 There are three alternatives to storing all this information on the FPGA; storing it in block RAM, distributed RAM/LUTRAM or in registers. The FPGA to be used in the SmallSat's first prototype is the Zynq Z-7030 or the Zynq Z-7035. 
-The FPGAs contains the memory resources as shown in figure \ref{fig:zynq_memory_resources}.
+The FPGAs contains the memory resources as shown in figure \ref{fig:zynq_memory_resources}. The Z-7030 and the Z-7035 contains 265 and 500 36kbit BRAM blocks respectively. The number of DSP Slices is 400 for the Z-7030 and 900 for the Z-7035. These are important for implementation of multiplication. 
 
 
 
 
 
 \begin{figure}[H]
-\centering                                                              \includegraphics[scale=0.5]{images/zynq_memory_resources.PNG}
-  \caption{Zynq memory resources, found in \cite{cite:mem_resources_zynq}.} 
+\hbox{\hspace*{-1cm}                               \includegraphics[scale=0.45]{images/zynq_memory_resources.PNG}}
+  \caption{Zynq memory resources \cite{cite:mem_resources_zynq}.} 
   \label{fig:zynq_memory_resources}.
 \end{figure}
 
 \subsubsection{Using registers}
-The Zynq Z-7030 and the Zynq Z-7035 have $157,200$ and $343,800$ flip flops each, respectively. Using equation \ref{eq:max_bands}, the maximal number of spectral bands used is 70 and 103. However, this is unrealistic as this leaves no flip flop free for other use in the design. As the AD implemented in this task is a part of a larger processing pipeline (insert picture of pipeline somewhere?) it is not acceptable to use all of the available flip flops. Assuming that it is acceptable to use 15\% of the available flip flops, the number of spectral bands that can be used is 27 and 40 for the Zynq Z-7030 and the Zynq Z-7035 respectively. This dimensional reduction can be done through pre-prossesing of data by for example Principal Component Analysis(PCA). (insert result showing AD doing better with PCA in front?). 
-The benefit of the use of registers is the speed and the ability of instantaneous update. %This will lead to the AD becoming closer to real-time than if distributed RAM or BRAM is used.
-
+The Zynq Z-7030 and the Zynq Z-7035 contains $157,200$ and $343,800$ flip flops each, respectively. By using equation \ref{eq:max_bands}:%, the maximal number of spectral bands used is 70 and 103.
 \begin{equation}
-    max\_bands= \sqrt{\frac{number\_of\_registers}{2*pixel\_data\_width}}
+    max\_bands= \sqrt{\frac{number\_of\_registers}{2*pixel\_data\_width \times number\_of\_matrices}},
     \label{eq:max_bands}
 \end{equation}
 
+it is possible to do an estimation of the maximum value of $P\_bands$ if using registers for storage of the matrices. $number\_of\_matrices$ is the number of matrices of size $P\_bands$ $\times$ $P\_bands$ that needs to be stored in memory. For $number\_of\_matrices$=5, $max\_bands$ =[31,46].
+
+
+However, this is unrealistic as this leaves no flip flop free for other use in the design. As the AD implemented in this task is a part of a larger processing pipeline it is not acceptable to use all of the available flip flops. Assuming that it is acceptable to use 15\% of the available flip flops, the number of spectral bands that can be used is 12 and 17 for the Zynq Z-7030 and the Zynq Z-7035 respectively. Dimensional reduction to reduce $P\_bands$ from 100 to 12 or 17 can be done through pre-prossesing of data by for example Principal Component Analysis (PCA).
+The benefit of the use of registers is the speed and the ability of instantaneous update. %This will lead to the AD becoming closer to real-time than if distributed RAM or BRAM is used.
+
+
+
 \subsubsection{Using BRAM}
-The Z-7030 and the Z-7035 contains 265 and 500 $36$kbit BRAM - blocks respectively. In  order to store the largest correlation matrix of $320 kbit$ a minimum of 9 BRAM blocks are needed. Each 36 kbit BRAM block consists of two 18 kbit BRAM blocks. In true dual port(TDP) mode \cite{cite:ug953}, it is possible to do two writes and two reads per BRAM per clock cycle, with each write and read being maximum 36 bits. BRAMs in TDP mode have only one address input, the same address for reads and writes. This makes it hard to use for the correlation module, as the ACAD correlation needs to read previously stored data from the BRAM before writing to the same address. Therefore, it is necessary to have a separate read and write address. By inferring two separate Simple Dual Port(SDP) 18kbit BRAMs, by the code shown in Listing \ref{lst:inferr_bram}, it is possible to get two writes and two reads per cycle, with separate read and write addresses. Two SDPs are stored within one 36kbit BRAM block. This is shown in Figure \ref{fig:BRAM_hierarchy}.
+The Z-7030 and the Z-7035 contains 265 and 500 $36$kbit BRAM - blocks respectively. In  order to store the largest matrix of $320 kbit$ a minimum of 9 BRAM blocks are needed. Each 36 kbit BRAM block consists of two 18 kbit BRAM blocks. In true dual port(TDP) mode \cite{cite:ug953}, it is possible to do two writes and two reads per BRAM per clock cycle, with each write and read being maximum 36 bits. BRAMs in TDP mode have only one address input, the same address for reads and writes. This makes it hard to use for the correlation module, as the ACAD correlation needs to read previously stored data from the BRAM before writing to the same address. Therefore, it is necessary to have a separate read and write address. By inferring two separate Simple Dual Port(SDP) 18kbit BRAMs, by the code shown in Listing \ref{lst:inferr_bram}, it is possible to get two writes and two reads per cycle, with separate read and write addresses.
 
 \lstinputlisting[caption={Code for inferring a SDP 18 kbit BRAM.},label={lst:inferr_bram},style=customc]{code/bram_espen_sdp.vhd}
 
 
-\begin{figure}[H]
-\centering
-
-   \includegraphics[scale=0.5]{images/BRAM_two_18_kbit.PNG}
-  \caption{BRAM hierarchy for correlation module, showing two 18kbit BRAM blocks, contained within one 36kbit BRAM block. } 
-  \label{fig:BRAM_hierarchy}
-\end{figure}
-
-\\
 
 
-Equation \ref{eq:clk_cycles_corr_update_BRAM} shows the calculation of number of clock cycles needed to update the correlation matrix, $n\_clk\_update\_corr\_BRAM$. This is done for each pixel in the image. $n\_BRAM$ is the number of 36 kbit BRAMs used to store the correlation matrix. The total time spent updating the correlation matrix for the entire image is given by equation \ref{eq:clk_cycles_corr_image}. Updating a correlation matrix wih $p$ = 100, using 9 BRAMs in TDP mode would require 556 clk cycles. For the entire image, having $N\_pixels$ the total amount of clock cycles spent updating the correlation matrix would be 349648384. At a target clock frequency of 100 MHz this would require $3.49648$ seconds, which is not to be considered real time.   
+
+
+
+Equation \ref{eq:clk_cycles_corr_update_BRAM} shows the calculation of number of clock cycles needed to update $\Tilde{\textbf{R}}(\textbf{x}_k)$ of size $P\_bands$ $\times$ $P\_bands$, $n\_clk\_update\_corr\_BRAM$. The update is done for each pixel in the image. $N\_bram$ is the number of 36 kbit BRAMs used to store $\Tilde{\textbf{R}}(\textbf{x}_k)$. The total time spent updating the correlation matrix for the entire image is given by equation \ref{eq:clk_cycles_corr_image}. Updating a matrix with $P\_bands$ = 100, using 9 BRAMs in TDP mode would require 556 clk cycles. For the entire image, having $N\_pixels$ the total amount of clock cycles spent updating the correlation matrix would be 349648384. At a target clock frequency of 100 MHz this would require $3.49648$ seconds.
 
 \begin{equation}
-    n\_clk\_update\_corr\_BRAM = \frac{p * p }{2 * n\_BRAM}
+    n\_clk\_update\_corr\_BRAM = \frac{P\_bands \times P\_bands }{2 \times N\_bram}
     \label{eq:clk_cycles_corr_update_BRAM}
 \end{equation}
 
 \begin{equation}
-    clk\_corr\_image\_BRAM = N\_pixels *number\_of\_lines * n\_clk\_update\_corr\_BRAM
+    clk\_corr\_image\_BRAM = N\_pixels \times N\_rows \times n\_clk\_update\_corr\_BRAM
     \label{eq:clk_cycles_corr_image}
 \end{equation}
 
-
-Figure \ref{fig:update_time_correlation_BRAM} shows the total time spent updating the correlation matrix for a image of 1088 pixel rows with 578 effective pixels per row, with a target clock frequency of 100 MHz. The BRAMs are assumed written to in parallel.  
+Figure \ref{fig:update_time_correlation_BRAM} shows the estimated total time spent updating $\Tilde{\textbf{R}}(\textbf{x}_k)$ for an image of $N\_rows$ =1088 $\times$ $N\_pixels$ = 578 , with a target clock frequency of 100 MHz. Plotted as a function of number of 36 kbit BRAMs used to store and update $\Tilde{\textbf{R}}(\textbf{x}_k)$. The BRAMs are assumed written to in parallel. Plotted for spectral bands in the range of $P\_bands$=20 to $P\_bands$=100.
 
 \begin{figure}[H]
 \centering
 \hbox{\hspace*{-2cm}                                                           
 
    \includegraphics[scale=0.3]{images/time_spent_updating_correlation_matrix.png}}
-  \caption{Estimated time spent updating correlation matrix for an image of 1088 pixel rows with 578 effective pixel per row, with a target clock frequency of 100 MHz, plotted as a function of number of 36 kbit BRAMs used to store and update the correlation matrix. Plotted for spectral bands in the range of P=20 to P=100. } 
+  \caption{Estimated time spent updating $\Tilde{\textbf{R}}(\textbf{x}_k)$. } 
   \label{fig:update_time_correlation_BRAM}
 \end{figure}
 
-\section{Shiftregister\_four\_bands}
+Two 18kbit SDPs are contained within one 36kbit BRAM block. \textbf{BRAM\_X\_EVEN} contains even  This is shown in Figure \ref{fig:BRAM_hierarchy}. The width of the addresses $WRADDR$ and $RADDR$ will be $log_2(\frac{P\_bands}{2})-1$.
 
+
+\begin{figure}[H]
+\centering
+
+   \includegraphics[scale=0.5]{images/BRAM_two_18_kbit.PNG}
+  \caption{BRAM hierarchy, showing two 18kbit BRAM blocks contained within one 36kbit BRAM block. } 
+  \label{fig:BRAM_hierarchy}
+\end{figure}
+
+
+
+\section{Proposed implementation}
+
+The top level architecture of the ACAD Anomaly detector is shown in Figure \ref{fig:top_level_ACAD}. It consists of five blocks; \textbf{FSM ACAD}, \textbf{Shiftregister}, \textbf{ACAD correlation module}, \textbf{ACAD inverse module Gauss Jordan} and \textbf{dACAD module}.
+
+\begin{figure}[H]
+\refstepcounter{figure}
+\begin{tabular}{c|c}
+
+   \includegraphics[scale=0.54, angle=90, origin=c]{images/acad_top_level.PNG}
+   \rotatebox[origin=c]{90}{ Figure~\thefigure: Top level architecture of the ACAD anomaly detector.}
+  %\caption{ \textbf{ROTATE}FSM controlling the architecture shown in Figure  } 
+  \end{tabular}
+  \label{fig:top_level_ACAD}
+\end{figure}
+
+The $\textbf{Shiftregister}$ is a $P\_bands$ $\times$ $Pixel\_data\_width$ $\times$ 2 AXI-LITE compatible shiftregister. It gets input pixel data from the CubeDMA used by the Smallsat project. 64 bit data is shifted in per clock cycle. For $Pixel\_data\_width$ of 16, this means 4 bands are shifted in per cycle. When a complete pixel is shifted in, it is sent to the $\textbf{ACAD correlation module}$, which computes the matrix $\Tilde{\textbf{R}}(\textbf{x}_k)$. $\Tilde{\textbf{R}}(\textbf{x}_k)$ is then outputted two rows at the time to the $\textbf{ACAD inverse}$ module, which computes $\Tilde{\textbf{R}^{-1}}(\textbf{x}_k)$.\\
+
+Two rows of the inverse matrix is then sent to the $\textbf{dACAD module}$ per clock cycle. This block computes $\delta^{ACAD}$, as shown in Equation \ref{eq:ACAD_2}: 
+
+
+\begin{equation}
+    \delta^{ACAD}(\textbf{x}_k)= \textbf{x}_k^T\Tilde{\textbf{R}}^{-1}(\textbf{x}_k)\textbf{x}_k.
+    \label{eq:ACAD_2}
+\end{equation}
+
+$u_k$ and $t_k$ is calculated to decide if the pixel is anomalous or not. When all pixels have been processed, the generated anomaly map is outputted, and the ACAD anomaly detection is finished.   
+\\
+
+The $\textbf{FSM\_ACAD}$ block controls the state of the ACAD anomaly detector. 
+
+
+%\section{Memory considerations}
+%%\label{sec:memory_management}
+ %   As the ACAD anomaly detector is to be implemented on a Zynq Z-7030 or Z-7035 device, care must be taken when designing, with respect to logic and memory usage. As the hyperspectral image data inputted to the AD might have $P\_BANDS$=100, with 16-bit image data per spectral band, memory usage is an important consideration.   
+
+
+
+
+
+\section{Shiftregister}
+\textbf{THIS IS A SHIFTREGISTER OF FOUR BANDS(PIXELS) for pixel-datawidth of 16}
 
 
 \section{ACAD correlation}
@@ -102,7 +144,7 @@ Figure \ref{fig:update_time_correlation_BRAM} shows the total time spent updatin
 The \textbf{ACAD correlation module}, as shown in Figure \ref{fig:top_level_ACAD}, computes the ACAD correlation matrix $\Tilde{\textbf{R}}_{k x k}(\textbf{x}).
 \\
 
-As the SmallSat project is in the early phases, the value of $p$ for the data inputted to the AD from preprocessing steps are insecure. Another insecurity is the performance of the ACAD AD using PCA pre-processing, i.e. reducing the number of spectral bands in the AD. In addition, the ACAD AD requires storing of the inverse matrix, and the sum of anomaly detected. This is shown in figure X ( insert a figure showing the equation and what needs to be stored where). It is therefore not desirable to store the entire correlation matrix in flip flops, as there will be a need for storing other matrices, either in BRAM or DRAM, thereby inserting a bottleneck in the pipeline relative to the flip flop-updating step. Using BRAMs it is also possible to make a scalable solution for both small and large $p$. 
+As the SmallSat project is in the early phases, the value of $P\_bands$ for the data inputted to the AD from preprocessing steps are insecure. Another insecurity is the performance of the ACAD AD using PCA pre-processing, i.e. reducing the number of spectral bands in the AD. In addition, the ACAD AD requires storing of the inverse matrix, and the sum of anomaly detected. This is shown in figure X ( insert a figure showing the equation and what needs to be stored where). It is therefore not desirable to store the entire correlation matrix in flip flops, as there will be a need for storing other matrices, either in BRAM or DRAM, thereby inserting a bottleneck in the pipeline relative to the flip flop-updating step. Using BRAMs it is also possible to make a scalable solution for both small and large $p$. 
 \\
 
 
@@ -405,7 +447,7 @@ Figure \ref{fig:estimated_time_inverse} shows the estimated execution time in se
 \begin{figure}[H]
 \hbox{\hspace*{-3cm}                                                           
 
-   \includegraphics[scale=0.4]{images/estimated_execution_time_inverse_computation_in_seconds.png}}
+   \includegraphics[scale=0.3]{images/estimated_execution_time_inverse_computation_in_seconds.png}}
   \caption{Estimated execution time for inverse matrix computation for an image of 1088x576, in seconds. The horizontal line marks the 54 second processing specification set by the SmallSat project.  } 
   \label{fig:estimated_time_inverse}
 \end{figure}

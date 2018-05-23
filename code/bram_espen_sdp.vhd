@@ -17,7 +17,8 @@ entity block_ram is
     );
 end block_ram;
 architecture Behavioral of block_ram is
-  type bus_array is array(0 to B_RAM_SIZE-1) of std_logic_vector(B_RAM_BIT_WIDTH-1 downto 0);
+  type bus_array is array(0 to B_RAM_SIZE-1) of 
+  			std_logic_vector(B_RAM_BIT_WIDTH-1 downto 0);
   signal b_ram_data : bus_array;
 begin
   process(clk)
