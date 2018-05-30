@@ -7,7 +7,7 @@
 \subsection{AVIRIS}
 The Airborne Visible Infrared Imaging Spectrometer(AVIRIS) is a hyperspectral imager launched by NASA. Its main objective is to "identify, measure and monitor constituents of the Earth's surface and atmosphere" \cite{aviris}. 
 \subsubsection{Cuprite scene}
-Data from the Cuprite mining district \cite{Cuprite_data} captured by the AVIRIS imager is often used as a benchmark scene for different image processing algorithms, including anomaly detection algorithms. Scene 02 from the Cuprite mining can be seen in Figure \ref{fig:cuprite_mining_scene}. 12 different mineral with their respective spectral signature are extracted from the scene \cite{aviris_minerals}. The spectral signatures of the different minerals can be seen in Figure \ref{fig:minerals_Cuprite} 
+Data from the Cuprite mining district \cite{Cuprite_data} captured by the AVIRIS imager is often used as a benchmark scene for different image processing algorithms, including anomaly detection algorithms. Scene 02 from the Cuprite mining can be seen in Figure \ref{fig:cuprite_mining_scene}. 12 different mineral with their respective spectral signature are extracted from the scene \cite{aviris_minerals}. The spectral signatures of the different minerals can be seen in Figure \ref{fig:minerals_Cuprite}. 
 
 \begin{figure}[H]
 \hbox{\hspace*{-1cm}                                              
@@ -20,14 +20,14 @@ Data from the Cuprite mining district \cite{Cuprite_data} captured by the AVIRIS
 \hbox{\hspace*{-1.8cm}                                              
 
    \includegraphics[scale=0.7]{images/AD_testing/endmembers_Cuprite.PNG}}
-  \caption{ Spectral signatures of minerals from the Cuprite mining district. } 
+  \caption{ Spectral signatures of minerals from the Cuprite mining district \cite{aviris_minerals}. } 
   \label{fig:minerals_Cuprite}
 \end{figure}
 
 
 \subsection{NTNU Smallsat Project}
 
-The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands, $N_{bands}$, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per row in the image. The number of pixel rows,$N_{rows}$ is 1088. The hyperspectral image cube can be seen in Figure \ref{fig:HSI_image_cube}. Figure \ref{fig:HSI_functionality} displays the functionality of the hyperspectral imager. The imager captures data one pixel at the time, in a row-wise fashion \cite{SmallSat_project_description}.
+The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands, $N_{bands}$, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per row in the image. The number of pixel rows, $N_{rows}$ is 1088. The hyperspectral image cube can be seen in Figure \ref{fig:HSI_image_cube}. Figure \ref{fig:HSI_functionality} displays the functionality of the hyperspectral imager. The imager captures data one pixel at the time, in a row-wise fashion \cite{SmallSat_project_description}.
 
 \textbf{\begin{figure}[H]
 \centering
@@ -44,7 +44,7 @@ The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands,
 \end{figure}
 
 \section{NTNU Smallsat Project Hardware platform}
-The NTNU Smallsat project onboard processing system is a Zynq-7000 series System-on-Chip(SoC). The SoC can be tiled into two parts; the programmable system and the programmable logic. This is shown in Figure \ref{fig:zynq_7000}. The programmable system consists of a dual core ARM Cortex A9. The programmable logic main processing unit is a Artix-7 or Kintex-7 Series FPGA.
+The NTNU Smallsat project onboard processing system is a Zynq-7000 series System-on-Chip (SoC). The SoC can be tiled into two parts; the programmable system and the programmable logic. This is shown in Figure \ref{fig:zynq_7000}. The programmable system consists of a dual core ARM Cortex A9. The programmable logic main processing unit is a Artix-7 or Kintex-7 Series FPGA, depending upon the version of the Zynq-7000 series.
 
 
 \begin{figure}[H]
@@ -57,6 +57,12 @@ The NTNU Smallsat project onboard processing system is a Zynq-7000 series System
 
 \\
 The anomaly detection result will be sent from the satellite to a ground base station. The data budget for packet transmissions are as in page 23 in \cite{SmallSat_project_description}. The size of the AD result must be as small as possible to limit the anomaly detection data packet usage.  
+
+\subsection{AXI-Stream}
+AXI-Stream is a slimmed-down protocol for transfers, without any concept of addresses, where data is moved from one point to another. It is based on the read and write channels in the AXI protoicol. As for AXI buses, handshaking signals (\textbf{TREADY} and \textbf{TVALID}) are used when transferring data. A handshake of data is called a \textit{beat} according to the AXI and AXI-Lite specifications. \\
+
+The NTNU Smallsat utilizes AXI-Lite as the communication protocol between Intellectual Properties (IP). The operating frequency of the AXI-Lite protocol in the NTNU Smallsat project is 100 MHz. 
+
 
 \section{Anomaly detection}
 \label{sec:anomaly_detectors_theory}
@@ -80,38 +86,42 @@ Algorithms used for anomaly detection outputs a scalar for each pixel in an imag
 
 \subsection{Reed-Xiaoli algorithm}
 \label{sec:RX_theory}
-The Reed-Xiaoli(RX) algorithm \cite{reed1990adaptive} is one of the most widely used algorithms for anomaly detection in HSI, and is considered as the benchmark anomaly detection algorithm for hyperspectral data \cite{yang2015dual}.  
+The Reed-Xiaoli (RX) algorithm \cite{reed1990adaptive} is one of the most widely used algorithms for anomaly detection in HSI, and is considered as the benchmark anomaly detection algorithm for hyperspectral data \cite{yang2015dual}.  
 \\
-The RX algorithm was developed to address the scenario where no prior knowledge about the target signatures is available. Assuming that a single pixel target, \textbf{x}, is the observation test vector, the result of the RX algorithm is given by the filter in equation \ref{eq:RX_algorithm}.
+The RX algorithm was developed to address the scenario where no prior knowledge about the target signatures is available. Assuming that a single pixel target, \textbf{x}, is the observation test vector, the result of the RX algorithm is given by the filter in equation \ref{eq:RX_algorithm};
 
 \begin{equation}
-    RX(\textbf{x}) = (\textbf{x} - \textbf{u}_b)^T \sum^{-1} (\textbf{x} - \textbf{u}_b)	
+    RX(\textbf{x}) = (\textbf{x} - \textbf{u}_b)^T \sum^{-1} (\textbf{x} - \textbf{u}_b),	
 \label{eq:RX_algorithm}
 \end{equation}
 
-In equation \ref{eq:RX_algorithm} $\textbf{u}_b$ is the estimated background clutter sample mean, computed from the set of all pixel vectors in the image (referred to as the \textit{global set}  ). $\sum$ is the estimated background clutter covariance, estimated on the global set. Since the covariance is computed on the global set of pixels, the HSI needs to collect all data contained in the entire image before the RX anomaly detector(AD) can start. This means that the RX-algorithm in the original variant does not have the possibility to operate in real-time. 
+where $\textbf{u}_b$ is the estimated background clutter sample mean, computed from the set of all pixel vectors in the image (referred to as the \textit{global set}). $\sum$ is the estimated background clutter covariance, estimated on the global set. Since the covariance is computed on the global set of pixels, the HSI needs to collect all data contained in the entire image before the RX AD can start. This means that the RX-algorithm does not have the possibility to operate in real-time. 
 
 \subsection{Local RX algorithm}
 \label{sec:LRX_theory}
-An often used and important variant of the RX algorithm is the local RX(LRX) algorithm. By substituting the sample covariance matrix computed on the global set with the correlation matrix computed on a kernel of size $k$ $\times$ $k$ pixel vectors, it is possible to increase the parallelism of the AD and to get near real-time performance. The LRX can be considered as a local AD because each pixel of the image has its own correlation matrix. This correlation matrix is computed on the square kernel of size $k$ $\times$ $k$. The result of the LRX AD can then be expressed as in equation \ref{eq:LRX}. $\textbf{x}$ is the observation test pixel vector. $\textbf{R}$ $_{k x k}$ ($\textbf{x}$) is the correlation matrix of pixel vector $\textbf{x}$ computed on a square kernel of size $k$ $\times$ $k$ containing local neighbouring pixels. See figure \ref{fig:LRX}. 
-
+An often used and important variant of the RX algorithm is the local RX (LRX) algorithm. By substituting the sample covariance matrix computed on the global set with the correlation matrix computed on a kernel of size $K$ $\times$ $K$ pixel vectors, it is possible to increase the parallelism of the AD and to get near real-time performance. The LRX can be considered as a local AD because each pixel of the image has its own correlation matrix. This correlation matrix is computed on the square kernel of size $K$ $\times$ $K$. The 
+result of the LRX AD can be expressed as in equation \ref{eq:LRX}: 
 \begin{equation}
-    \delta_k^{LRX}(\textbf{x}) = \textbf{x}^T\textbf{R}^{-1}_{k x k}(\textbf{x})\textbf{x}
+    \delta_K^{LRX}(\textbf{x}) = \textbf{x}^T\textbf{R}^{-1}_{K x K}(\textbf{x})\textbf{x},
     \label{eq:LRX}
 \end{equation}
+
+ where $\textbf{x}$ is the observation test pixel vector, $\textbf{R}$ $_{K x K}$ ($\textbf{x}$) is the correlation matrix of pixel vector $\textbf{x}$ computed on a square kernel of size $K$ $\times$ $K$ containing local neighbouring pixels. See Figure \ref{fig:LRX}. 
+
+
 
 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.45]{images/LRX.PNG}
-  \caption{ Visualization of a kernel of size $k$ $\times$ $k$ used in LRX. } 
+  \caption{ Visualization of a kernel of size $K$ $\times$ $K$ used in LRX. } 
   \label{fig:LRX}
 \end{figure}
 
 
 \subsection{Adaptive Causal Anomaly Detection}
 \label{sec:ACAD_theory}
-A variant of the RX AD is the Adaptive Causal Anomaly detection (ACAD) \cite{chang2006characterization}. One issue of the RX algorithm is that previously detected anomalies with strong spectral signatures may have an impact upon the detection of later anomalies, as they may influence what is consider the background. This is shown in \cite{chang2006characterization}. ACAD is adaptive in the way that it builds a map of detected anomalies, and removes the previously detected anomaly pixel vectors from the causal sample correlation set. \\
+A variant of the RX AD is the Adaptive Causal Anomaly Detection (ACAD) \cite{chang2006characterization}. One issue of the RX algorithm is that previously detected anomalies with strong spectral signatures may have an impact upon the detection of later anomalies, as they may influence what is consider the background, which is shown in \cite{chang2006characterization}. ACAD is adaptive in the way that it builds a map of detected anomalies, and removes the previously detected anomaly pixel vectors from the causal sample correlation set. \\
 Another benefit of ACAD relative to RX and LRX is that it may be computed in real-time. This is achieved by using the causal correlation matrix $\textbf{R}$($\textbf{x}_k$), defined in equation \ref{eq:caus_corr}, instead of the covariance or the correlation matrix computed on the global or a local set of pixel vectors, as in RX and LRX, respectively. In equation \ref{eq:caus_corr} $\textbf{x}_k$ is the observation test pixel vector, and $k$ is the index of the pixel vector currently being processed. The sum in equation \ref{eq:caus_corr} sums the correlation matrix for the pixel sample vectors {$\textbf{x}_1$, ....$\textbf{x}_k$}.  
 
 \begin{equation}
@@ -119,7 +129,7 @@ Another benefit of ACAD relative to RX and LRX is that it may be computed in rea
     \label{eq:caus_corr}
 \end{equation}
 
-To remove the previously detected anomalous pixel vectors from the correlation set, the sample spectral correlation matrix, referred to as causal anomaly-removed sample spectral correlation matrix, is presented in equation \ref{eq:caus_corr_anomaly_removed}  \cite{chang2006characterization}:
+To remove the previously detected anomalous pixel vectors from the correlation set, the sample spectral correlation matrix, referred to as the causal anomaly-removed sample spectral correlation matrix, is presented in equation \ref{eq:caus_corr_anomaly_removed}  \cite{chang2006characterization}:
 
 \begin{equation}
     \Tilde{\textbf{R}}(\textbf{x}_k)= \textbf{R}(\textbf{x}_k) - \sum_{t_j\in\Delta(k)}\textbf{t}_j\textbf{t}_j^T ,
@@ -134,10 +144,10 @@ ACAD can then be defined as in equation \ref{eq:ACAD}:
     \label{eq:ACAD}
 \end{equation}
 
-ACAD is a causal filter, meaning that only the pixels previously processed are used for anomaly detection.  It computes the correlation matrix for the previously captured pixel sample vector {$\textbf{x}_1$, ....$\textbf{x}_k$} up to the pixel currently being processed, $k$, as shown in Equation \ref{eq:caus_corr}. This means that ACAD might be implemented in real-time and near-real time, seeing as pixels can be processed as soon as they are captured by the push-broom HSI and the AD does not need to wait for the entire image to be loaded into memory. \\
+ACAD is a causal filter, meaning that only the pixels previously processed are used for anomaly detection.  It computes the correlation matrix for the previously captured pixel sample vector {$\textbf{x}_1$, ....$\textbf{x}_k$} up to the pixel currently being processed, $k$, as shown in equation \ref{eq:caus_corr}. This means that ACAD might be implemented in real-time and near-real time, as pixels can be processed as soon as they are captured by the push-broom HSI and the AD does not need to wait for the entire image to be loaded into memory. \\
 
 An anomalous pixel vector have a significant spectral vector difference from its surroundings. Since ACAD is causal, the surroundings is defined as the $n_{acad}$ previously processed pixels. %To evaluate if a spectral vector is anomalous,
-ACAD defines the variable $u_k$, used to evaluate if a pixel vector is anomalous as shown in  Equation \ref{eq:u_k}: 
+ACAD defines the variable $u_k$, used to evaluate if a pixel vector is anomalous as shown in  equation \ref{eq:u_k}: 
 
 \begin{equation}
     u_k = \frac{1}{n_{acad}}\sum_{i-1}^{n_{ACAD}}  \delta^{ACAD}(\textbf{x}_{k-i}).
@@ -191,7 +201,7 @@ ACAD builds a map of detected anomalies. This map may be used to classify the de
 
 \subsection{Adaptive Local RX}
 \label{sec:Adaptive_LRX_theory}
-A modification of the LRX algorithm presented in section \ref{sec:LRX_theory} is the Adaptive Local RX (ALRX). This AD is a modification of LRX is presented by the author and is not yet described in literature(as far as the author knows). 
+A modification of the LRX algorithm presented in section \ref{sec:LRX_theory} is the Adaptive Local RX (ALRX). This AD is a modification of LRX presented by the author. It is not yet described in literature (as far as the author knows). 
 \\
 
 ALRX is inspired by the anomaly-map creation and the removal of previously detected anomaly pixel vectors from the causal sample correlation set as done in the ACAD AD. Similarly, ALRX builds a anomaly map and removes previously detected anomaly pixel vectors that are located within the local window from the local sample correlation set. The result of the ALRX AD is shown in equation \ref{eq:ALRX}: 
@@ -212,7 +222,7 @@ where $\Delta(k_{KxK})$ is the set of previously detected anomalous pixel vector
 \section{Inverse matrix}
 The computation of the inverse of a matrix is a part of all the considered ADs. Computing the inverse of a matrix is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization \cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
 
-Another option to implement the inverse function is by doing Gauss-Jordan elimination \cite{gauss_jordan_fpga}. The Gauss-Jordan elimination is less complex to implement in Hardware than QR-decomposition. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. A pseudocode for computing the Gauss-Jordan elimination is shown in Figure \ref{fig:gauss_jordan_pseudocode}. The Gauss-Jordan elimination can be divided into three parts; forward elimination, backward elimination and last division, marked by black, red and green square in Figure \ref{fig:gauss_jordan_pseudocode}. 
+Another option is to implement the inverse function by doing Gauss-Jordan elimination \cite{gauss_jordan_fpga}. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. A pseudo-code for computing the Gauss-Jordan elimination is shown in Figure \ref{fig:gauss_jordan_pseudocode}. The Gauss-Jordan elimination can be tiled into three parts; forward elimination, backward elimination and last division, marked by black, red and green square in Figure \ref{fig:gauss_jordan_pseudocode}. 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.7]{images/gauss_jordan_pseudocode.png}
@@ -222,7 +232,8 @@ Another option to implement the inverse function is by doing Gauss-Jordan elimin
 
 
 
-\subsection{Gauss-Jordan}
+\subsection{Gauss-Jordan elimination}
+\label{sec:gauss_jordan_theory}
 There are three different types of row operations performed on the rows of a matrix in Gauss-Jordan elimination:
 \begin{enumerate}
 \item Swap the positions of two rows. 
@@ -231,7 +242,7 @@ There are three different types of row operations performed on the rows of a mat
 \end{enumerate}  
 
 \subsubsection{Forward elimination}
-The first part of Gauss-Jordan elimination reduces the matrix to row echelon form(upper triangular matrix) by using row operations, starting at the topper-most row of the matrix, which is denoted as index zero, and iterates downwards. Two indexes are used, the outer index $i$ and the inner index $j$. This is shown in Figure \ref{fig:forward_elimination_pseudocode}. It may use all of the different row operations listed, depending upon the existence of a zero scalar in the diagonal of the matrix.   
+The first part of Gauss-Jordan elimination reduces the matrix to row echelon form(upper triangular matrix) by using row operations, starting at the topper-most row of the matrix, which is denoted as index zero, and iterating downwards. Two indexes are used, the outer index $i$ and the inner index $j$. This is shown in Figure \ref{fig:forward_elimination_pseudocode}. Forward elimination may use all of the different row operations listed, depending upon the existence of a zero element in the diagonal of the matrix.   
 
 \begin{figure}[H]
 \centering
@@ -253,7 +264,7 @@ Backward elimination utilizes row operation two and three in order to create a d
 
 
 \subsubsection{Last division}
-Last division is the last step of the Gauss-Jordan elimination. The last division starts at the topper-most index of the matrix, denoted index zero, and iterates downwards, shown in Figure \ref{fig:last_division_pseudocode}. It creates the matrix $A^{-1}$ by utilizing the second type of row operations, where $A$ $\times$ $A^{-1}$ = $I$, where $I$ is the identity matrix, which is a matrix of size $P\_bands$ $\times$ $P\_bands$ of zero elements, except for the diagonal of the matrix, which contains ones. 
+Last division is the last step of the Gauss-Jordan elimination. The last division starts at the topper-most index of the matrix, denoted index zero, and iterates downwards, shown in Figure \ref{fig:last_division_pseudocode}. It creates the matrix $A^{-1}$ by utilizing the second type of row operations. $A^{-1}$ is the inverse matrix of $A$; $A$ $\times$ $A^{-1}$ = $I$. $I$ is the identity matrix of size $P\_bands$ $\times$ $P\_bands$ containing zero elements, except for the diagonal of the matrix, which contains ones. 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.5]{images/last_division_pseudocode.png}

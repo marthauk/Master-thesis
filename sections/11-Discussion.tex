@@ -1,3 +1,19 @@
-\chapter{Discusssion}
+\chapter{Discussion}
 \label{sec:Discussion}
+
+\section{Resource usage}
+Synthesis results shows that the \textbf{ACAD correlation} block scales as expected with regards to number of BRAM36E1 and DSP48E1 used.\\
+
+
+\\
+ Implementing division using the division operator "/" is not viable, as the \textbf{Last division} block fails to meet timing requirements when using this approach. This holds for dividend/divisor bit width down to five. \\
+
+The adaptive shifting approach is an interesting approach for implementation of division, and the approach meets timing requirements. A large uncertainty however, is the effect of precision error when utilizing this approach.\\ 
+
+
+Implementing division through the LUT-approach shows promising results with regards to timing. The author has not focused on optimizing the LUT-approach with regards to timing, as the approach was implemented late in the process of doing this thesis. The synthesis results for the \textbf{Inverse} block when using LUT-approach with $Div\_Precision$ =17 yielded a WNS of -5.972ns, in which 4.847 of this is net delay. This net delay is most likely severely higher than what is realistic, as the outputs of the \textbf{Inverse} block is mapped to output pins when running synthesis using the \textbf{Inverse} block as top module. This will not be the case for the complete implementation of the ACAD anomaly detector, as the output from the \textbf{Inverse} module will be mapped to an internal bus connected to the \textbf{dACAD} block. The net delay will therefore be considerably lower.  The additional -1.25 ns WNS owing to logic delay may be reduced when running implementation instead of synthesis, as implementation results typically reduce number of LUTs inferred.  \\
+
+One concern regarding the LUT-approach is the high number of DSPs inferred. The Zynq Z-7030 contains 400 DSP Slices, while the Z-7035 contains 900. According to synthesis results the LUT-approach implementation of the \textbf{Inverse} block utilizes 540 DSPs for $P\_bands$ =30 and $Div\_Precision$ = 17. \\
+
+
 
