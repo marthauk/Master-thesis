@@ -16,20 +16,28 @@
 %Will some restriction be lifted?\\
 %Will you save the world with your Nifty Gadget?++
 %
+A proposed implementation of the ACAD algorithm has been made. This algorithm was chosen after a comprehensive review of existing AD algorithms. The ACAD algorithm has been tested on real and synthetic image data by the author and by Chang \cite{chang2006characterization}, and shows promising results. \\
+
+The causality of the ACAD algorithm is beneficial for hardware implementation, as it enables real-time anomaly detection. ACAD builds a binary anomaly map. It is then possible to send the binary anomaly map instead of transmitting $\delta^{ACAD}(\textbf{x}_{k})$. This is advantageous with regards to data transmission, as this lowers transmission time. Transmission cost is  \\
+
+The main bottleneck of the processing pipeline in the ACAD is the inverse computation. 
 
 \section{Future work}
 
 \subsection{Optimizations}
 
-All BRAMs used in the correlation module could have its content initialized to zero. This could help simplify the control of the correlation module.
 
 \\ 
-Evaluate the value $\tau$ based on experimental results.\\
+Completing the ACAD anomaly detector. The \textbf{dACAD} should be implemented, as well as \textbf{FSM ACAD}. When the ACAD anomaly detector is completed, it should be tested on a Zedboard Zynq Evaluation and Development kit.
+
+
+
+Set the value $\tau$ based on experimental results. The experiments should contain real hyperspectral image data from coastal areas with algae that are interesting for the SmallSat project. $\tau$ is important to be able to make a correct anomaly map. \\
 
 Inverse computation; use Matrix Inversion Lemma as proposed by Hsueh in \cite{hsueh_master_thesis}.\\
 
-Power optimizations; clock enable signals for modules.\\
+Power optimization should be done. This is especially important as the ACAD anomaly detector is to be implemented on an energy-limited satellite. One of the most efficient and easiest power optimization is the usage of clock enable signals for sub-modules in the design; for instance \textbf{ACAD inverse}, \textbf{ACAD correlation}, \textbf{dACAD}. Their respective sub-modules could also have clock enable signals.\\
 
 Precision LUT approach must be checked!\\
 
-Verificiation!!!
+Verification of the design must be done. As of now the only form of verification done has been constrained random input simulation on the blocks \textbf{Shiftregister}, \textbf{ACAD correlation} and \textbf{ACAD inverse}. The designs should be further simulated for a wider range of inputs. An automatic test-setup should be made, with a golden reference model, possibly by using MATLAB or other high-level tools or languages. The design should also be tested on the Zedboard Evaluation and Development kit. 

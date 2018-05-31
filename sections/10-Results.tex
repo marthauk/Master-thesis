@@ -5,7 +5,14 @@
 \section{Synthesis}
 \label{sec:synthesis_results}
 All synthesis results in this chapter are synthesized for $Pixel\_Data\_Width$ of 16, unless another value is 
-especially mentioned. Results presented in this chapter are gathered from synthesis utilization reports.
+especially mentioned. Results presented in this chapter are gathered from synthesis utilization reports.\\
+
+The designs were synthesized in Vivado. As Zynq-7000 - Z7030/Z7035 was not available for synthesis, the Zedboard Evaluation and Development kit was used for synthesis. This kit contains less logic than the Z7030/Z7035. The kit contains only 220 DSPs. This leads to the the \textbf{ACAD inverse} over-utilizing DSPs when running synthesis for designs with $P\_bands$ $>=$ 20. When over-utilizing DSPs, the logic gets mapped to LUTs instead, as described in \cite{cite:dsp_overutilizing}, and will produce unusable synthesis results. Therefore; the design was synthesized for xc7k160tiffv676-2L, as this device contains 600 DSPs, in addition to having a similar architecture as the Zedboard (has Slice Registers and Slice LUTs, as opposed to CLB Registers and CLB LUTs). \textbf{ACAD correlation} also over-utilizes DSPs for $P\_bands$ >=60 and $Pixel\_data\_width$ = 16. Therefore, \textbf{ACAD correlation} is synthesized for xc7k160tiffv676-2L for $P\_bands$ >= 60 and $Pixel\_data\_width$ = 16.\\
+
+Timing results when synthesizing for xc7k160tiffv676-2L is not considered usable, as the device logic is different to the Zedboard. The Zedboard contains an Artix-7 device, which is a slower device than the Z-7030/Z-7035, which are Kintex-7 devices. Designs that meets timing demands for the Zedboard will therefore also meet timing demands for the Z-7030/Z-7035 devices. In addition to this, the intial test prototype is to be implemented on a Zedboard. As such, it is valuable to see if the design meet timing when running on Zedboard. Therefore, only timing results from synthesis on the Zedboard Evaluation and development kit is presented. 
+
+
+
 \subsection{Shiftregister}
 \textbf{Shiftregister} was synthesized for $P\_bands$=10,20,30,40,50,60,70,80,90,100. Number of synthesized Slice registers and Slice LUTs are shown in Figure \ref{fig:primitives_shiftregister}. 
 
@@ -34,10 +41,21 @@ The design was synthesized for $P\_bands$= [10, 20, 30, 40, 50, 60, 70, 80, 90, 
 
 \hbox{\hspace*{-2cm}                                                           
    \includegraphics[scale=0.3]{images/correlation_luts_and_registers.png}}
-  \caption{Number of synthesized SLICE REGISTERS and Slice LUTs as a function of $P\_bands$ for the \textbf{ACAD correlation} block. } 
+  \caption{Number of synthesized Slice Registers and Slice LUTs as a function of $P\_bands$ for the \textbf{ACAD correlation} block. } 
   \label{fig:luts_and_regs_corr}
 \end{figure}
 
+\subsubsection{$Pixel\_data\_width$ = 10}
+ As \textbf{ACAD correlation} inferred a large number of DSPs, $Pixel\_data\_width$ was lowered to see if the number of DSPs inferred would be lowered. The design inferred DSPs for $Pixel\_data\_width$ >= 11, but for $Pixel\_data\_width$ = 10 the synthesis tool did not inferr any DSPs. Instead the logic was mapped to LUTs. Number of BRAMs synthesized are unchanged when varying $Pixel\_data\_width$. Number of LUTs and registers synthesized are shown in Figure  \ref{fig:correlation_luts_and_registers_10}. 
+ 
+\begin{figure}[H]
+
+\hbox{\hspace*{-2cm}                                                           
+   \includegraphics[scale=0.3]{images/syntese_resultat/acad_correlation_using_pixel_data_with_10_luts_and_registers.png}}
+  \caption{Number of synthesized Slice Registers and Slice LUTs as a function of $P\_bands$ for the \textbf{ACAD correlation} block for $Pixel\_data\_with$ =10. } 
+  \label{fig:correlation_luts_and_registers_10}
+\end{figure}
+ 
  
 
 \subsection{Inverse}
@@ -94,14 +112,55 @@ The design was synthesized for $P\_bands$= [10, 20, 30, 40, 50, 60, 70, 80, 90, 
 %  \label{fig:synthesis_result_naive_inverse}
 %\end{figure}
 
-\subsection{Division timing results}
-\subsubsection{Worst Negative Slack division operator}
+\subsection{Timing results}
+To check if the design met timing, the WNS of the synthesized designs was checked. The target clock frequency was set to 100 MHz. 
+\subsubsection{WNS ACAD Correlation}
+\textbf{ACAD correlation} was synthesized for $P\_bands$ = [10, 20, 30, 40, 50] and $Pixel\_data\_width$ = 16 on the ZedBoard Zynq Evaluation and Development Kit. The timing results are presented in Table \ref{tab:wns_correlation}.
+
+\begin{table}[H]
+    \centering
+    % \resizebox{1.\textwidth}{!}{
+    \begin{tabular}{c|c}
+    \textbf{$P\_bands$} &\textbf{WNS [ns]} \\
+    10 & 4.235 \\
+    20 & 0.721\\
+    30 &1.446\\
+    40 & 0.845 \\
+    50 & 0.509 \\
+    \end{tabular}%}
+    \caption{Timing results for \textbf{ACAD correlation} $Pixel\_data\_width$ = 16.}
+    \label{tab:wns_correlation}
+\end{table}
+
+\textbf{ACAD correlation} was synthesized for $P\_bands$ = [10, 20, 30, 40, 50, 60, 70, 80, 90] and $Pixel\_data\_width$ = 10 on the ZedBoard Zynq Evaluation and Development Kit. The timing results are presented in Table \ref{tab:wns_correlation_10}.
+\begin{table}[H]
+    \centering
+    % \resizebox{1.\textwidth}{!}{
+    \begin{tabular}{c|c|c|c}
+    \textbf{$P\_bands$} &\textbf{WNS [ns]}& \textbf{Net delay [ns]}& \textbf{Logic delay [ns]} \\
+    10 &-3.074 & 7.860 & 5.078 \\
+    20 & -3.309& 7.868 & 5.305 \\
+    30 & -3.109 & 6.732 & 6.241\\
+    40 & -3.319 & 7.698 & 5.485 \\
+    50 & -3.324 & 7.703 & 5.485 \\
+    60 & -3.331 & 7.518 & 5.677 \\
+    70 & -4.923 & 8.563 & 6.224 \\
+    80 & -4.881 & 8.521 & 6.224 \\
+    90 & -5.224 & 9.373 & 5.735 \\
+    
+    \end{tabular}%}
+    \caption{Timing results for \textbf{ACAD correlation} $Pixel\_data\_width$ = 10.}
+    \label{tab:wns_correlation_10}
+\end{table}
+
+
+\subsubsection{WNS division operator}
 Implementing division by the use of the division operator "/" yielded the timing results presented in Table \ref{tab:division_operator_wns} when synthesizing block \textbf{Last division}, computing the product $C= B*\frac{1}{A}$. Data width for factor $B$ is 32 bit. The design was synthesized for dividend and divisor data width of 32, 8, 6 and 5, with a target clock constraint of 100 MHz. The target device was the Zedboard Zynq Evaluation and Development kit. 
 \begin{table}[H]
     \centering
      \resizebox{1.\textwidth}{!}{
     \begin{tabular}{c|c|c}
-    \textbf{Data width divisor and dividend} &\textbf{WNS[ns]}&\textbf{Max frequency[MHz] } \\
+    \textbf{Data width divisor and dividend} &\textbf{WNS [ns]}&\textbf{Max frequency [MHz] } \\
          32&-80.524&11.046 \\
          8 & -11.776&45.934 \\
          6&-7.071& 58.578\\
@@ -120,7 +179,7 @@ Implementing division by the use of the division operator "/" yielded the timing
  \subsubsection{Worst Negative Slack LUT approach}
  The \textbf{Inverse} block was synthesized for Zedboard Zynq Evaluation and Development kit 7020 with $Div\_Precision$ = 17 and $P\_bands$ =10. The synthesis results yielded a WNS of -5.972 ns. 4.847 of this is net delay. \\
  
-$P\_bands$ =10 was chosen due to the LUT-approach over-utilizing DSP48E1 for higher number of $P\_bands$. Over-utilization leads to logic being mapped to LUTs instead of DSP48E1s, leading to wrongful timing results, as described in \cite{cite:dsp_overutilizing}. 
+$P\_bands$ =10 was chosen due to the LUT-approach over-utilizing DSP48E1 for higher number of $P\_bands$. 
  
  
  \section{Simulation}

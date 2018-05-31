@@ -219,7 +219,10 @@ The \textbf{ACAD correlation}, as shown in Figure \ref{fig:top_level_ACAD}, comp
 
 The design is made for an even number of $P\_bands$. If odd number of spectral band is used, a band with zero values has to be inserted or the matrix needs to be re-scaled to an even number of $P\_bands$ before inputting to the \textbf{ACAD correlation}.\\
 
-The design is made to be scalable with $P\_bands$, and will synthesize $P\_bands$ 36 kbit BRAMs and $P\_bands$ $\times$ 2 DSP48E1 (used for multiplication). Data flow and architecture of the correlation module can be seen in Figure \ref{fig:data_flow_correlation}. 
+
+% THIS IS HIGHLY insecure
+%The design is made to be scalable with $P\_bands$, and will synthesize $P\_bands$ 36 kbit BRAMs and $P\_bands$ $\times$ 2 DSP48E1 (used for multiplication).
+Data flow and architecture of the correlation module can be seen in Figure \ref{fig:data_flow_correlation}. 
 
 %NUMBER_OF_WRITES_PER_CYCLE_PER_BRAM
 
@@ -617,7 +620,7 @@ Figure \ref{fig:estimated_time_inverse} shows the estimated execution time in se
 \hbox{\hspace*{-2cm}                                                           
 
    \includegraphics[scale=0.25]{images/estimated_execution_time_inverse_computation_in_seconds.png}}
-  \caption{Estimated execution time for computation of $\Tilde{\textbf{R}}^{-1}(\textbf{x}_k)$ for an image of 1088x576 in seconds. } 
+  \caption{Estimated execution time for computation of $\Tilde{\textbf{R}}^{-1}(\textbf{x}_k)$ for an image of size 1088x576 in seconds. } 
   \label{fig:estimated_time_inverse}
 \end{figure}
 %%\subsubsection{Inverse computation}

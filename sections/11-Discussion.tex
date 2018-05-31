@@ -2,18 +2,28 @@
 \label{sec:Discussion}
 
 \section{Resource usage}
-Synthesis results shows that the \textbf{ACAD correlation} block scales as expected with regards to number of BRAM36E1 and DSP48E1 used.\\
+\subsection{DSP usage $Pixel\_data\_width$ = 16}
+Synthesis results shows that \textbf{ACAD correlation} infers $P\_bands$ $\times$ 4 DSP48E1s and $P\_bands$ BRAMs for $Pixel\_data\_width$ = 16. \\
 
 
 \\
+The \textbf{ACAD inverse} using the LUT-approach also infers a large number of DSPs. The Zynq Z-7030 contains 400 DSP Slices, while the Z-7035 contains 900. According to synthesis results the LUT-approach implementation of the \textbf{Inverse} block utilizes 540 DSPs for $P\_bands$ = 30 and $Div\_Precision$ = 17. As \textbf{ACAD correlation} infers $P\_bands$ $\times$ 4 DSPs for $Pixel\_data\_width$ >= 11, the total number of DSPs synthesized for these two modules for $P\_bands$ and $Div\_Precision$ =16 will be 660. This is a lot, especially considering that \textbf{dACAD} computes $\delta^{ACAD}(\textbf{x}_k)= \textbf{x}_k^T\Tilde{\textbf{R}}^{-1}(\textbf{x}_k)\textbf{x}_k$, in which $\textbf{x}_k$ is a pixel vector of size $P\_bands$ $\times$ $Pixel\_data\_width$, and $\Tilde{\textbf{R}}^{-1}(\textbf{x}_k)$ is a matrix of size $P\_bands$ $\times$ $P\_bands$ $\times$ $Pixel\_data\_width$. This computation will most likely also utilize DSPs, depending upon implementation.  
+The large usage of DSPs constrains the size of the matrix possible to input to the ACAD AD. %If $Pixel\_data\_width$ = 16, this means  
+% Solution; correlation; spend more time ? HALF the amount of DSPs, doubling the time?
+\subsection{$Pixel\_data\_width$ = 10}
+When synthesizing \textbf{ACAD correlation} with $Pixel\_data\_width$ = 10 no DSPs are inferred. Instead the logic gets mapped to LUTs as shown in Figure \ref{fig:correlation_luts_and_registers_10}. Inferring the logic in LUTs instead of in DSPs leads to the design failing to meet timing, as shown in Table \ref{tab:wns_correlation_10}. But, as can also be observed Table \ref{tab:wns_correlation_10}, the \textbf{Net delay} is high, and increasing as a function of $P\_bands$. This is due to the output ports of \textbf{ACAD correlation} getting mapped to physical output pins on the synthesized device. This will not be the case in implementation, as the output ports of \textbf{ACAD correlation} is proposed connected to \textbf{ACAD inverse} and \textbf{FSM ACAD}. 
+As such, the net delay is most likely unrealistically large, as mapping to output pins scattered on the physical interface of the device will result in higher delay than mapping to internal buses located inside the device. It is therefore the authors belief that \textbf{ACAD correlation} will meet timing once the design is a submodule of the ACAD anomaly detector.  
+
+
+
+\section{Timing results}
+\textbf{Correlation}
+
+The 
+
+\subsection{\textbf{Inverse}}
  Implementing division using the division operator "/" is not viable, as the \textbf{Last division} block fails to meet timing requirements when using this approach. This holds for dividend/divisor bit width down to five. \\
 
 The adaptive shifting approach is an interesting approach for implementation of division, and the approach meets timing requirements. A large uncertainty however, is the effect of precision error when utilizing this approach.\\ 
 
-
-Implementing division through the LUT-approach shows promising results with regards to timing. The author has not focused on optimizing the LUT-approach with regards to timing, as the approach was implemented late in the process of doing this thesis. The synthesis results for the \textbf{Inverse} block when using LUT-approach with $Div\_Precision$ =17 yielded a WNS of -5.972ns, in which 4.847 of this is net delay. This net delay is most likely severely higher than what is realistic, as the outputs of the \textbf{Inverse} block is mapped to output pins when running synthesis using the \textbf{Inverse} block as top module. This will not be the case for the complete implementation of the ACAD anomaly detector, as the output from the \textbf{Inverse} module will be mapped to an internal bus connected to the \textbf{dACAD} block. The net delay will therefore be considerably lower.  The additional -1.25 ns WNS owing to logic delay may be reduced when running implementation instead of synthesis, as implementation results typically reduce number of LUTs inferred.  \\
-
-One concern regarding the LUT-approach is the high number of DSPs inferred. The Zynq Z-7030 contains 400 DSP Slices, while the Z-7035 contains 900. According to synthesis results the LUT-approach implementation of the \textbf{Inverse} block utilizes 540 DSPs for $P\_bands$ =30 and $Div\_Precision$ = 17. \\
-
-
-
+Implementing division through the LUT-approach shows promising results with regards to timing. The author has not focused on optimizing the LUT-approach with regards to timing, as the approach was implemented late in the process of doing this thesis. The synthesis results for the \textbf{Inverse} block when using LUT-approach with $Div\_Precision$ =17 yielded a WNS of -5.972ns, in which 4.847 of this is net delay. This net delay is most likely unrealistic large, as the outputs of the \textbf{Inverse} block is mapped to output pins when running synthesis using the \textbf{Inverse} block as top module. This will not be the case for the complete implementation of the ACAD anomaly detector, as the output from the \textbf{Inverse} module will be mapped to an internal bus connected to the \textbf{dACAD} block. The net delay will therefore be considerably lower.  The additional -1.25 ns WNS owing to logic delay may be reduced when running implementation instead of synthesis, as implementation results typically reduce number of LUTs inferred.  \\

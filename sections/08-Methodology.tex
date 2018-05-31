@@ -413,7 +413,15 @@ ACAD &Hsueh: &Hsueh: &Figure \ref{fig:cuprite_scene_acad_result} & High. & May p
 \end{table}
  
  
- Other metrics are also important to consider in order to choose the best AD for implementation in HW. The ACAD and the ALRX algorithms is beneficial with regards to data transmission requirements, as they build a binary anomaly map of size $N_{pixels}$ $\times$ $N_{rows}$ which may be transmitted, as opposed to RX and LRX algorithms which produces output results of size  $Pixel\_data\_width$ $\times$ 2 $\times$ $N_{pixels}$ $\times$ $N_{rows}$. \\
+ Other metrics are also important to consider in order to choose the best AD for implementation in HW. The ACAD and the ALRX algorithms is beneficial with regards to data transmission requirements, as they build a binary anomaly map of size $N_{pixels}$ $\times$ $N_{rows}$ which may be transmitted, as opposed to RX and LRX algorithms which produces output results of size  $Pixel\_data\_width$ $\times$ 2 $\times$ $N_{pixels}$ $\times$ $N_{rows}$. If the result from the AD is to be transmitted via radio to the ground station, this will become an important consideration, as the transmission layer is usually the most power-hungry layer in wireless sensor nodes (WSN). One example of this is shown in Figure \ref{fig:transmission_costs} \cite{sachan2012energy}:   \\
+ \begin{figure}[H]
+
+
+   \includegraphics[0.7]{images/transmission_wns.png}
+  \caption{Power consumption in a WSN \cite{sachan2012energy}. } 
+  \label{fig:transmission_costs}
+\end{figure}
+ 
  
  The ACAD algorithm's causality and the use of correlation matrix makes it easier to process in real time than the LRX and GRX algorithms. ACAD can immediately start processing as the first pixel is captured, while RX, utilizing the global covariance or correlation matrix, cannot start processing until the entire image is captured by the hyperspectral imager. LRX needs an image tile of size $k$ $\times$ $k$ before starting.\\
  
