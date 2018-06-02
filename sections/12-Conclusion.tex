@@ -16,23 +16,32 @@
 %Will some restriction be lifted?\\
 %Will you save the world with your Nifty Gadget?++
 %
-A proposed implementation of the ACAD algorithm has been made. This algorithm was chosen after a comprehensive review of existing AD algorithms. The ACAD algorithm has been tested on real and synthetic image data by the author and by Chang \cite{chang2006characterization}, and shows promising results. \\
+A proposed implementation of the ACAD algorithm has been made. The implementation is to be implemented on the Zynq-Z7030 or the Zynq-Z7035. ACAD was chosen after a comprehensive review of existing AD algorithms. The ACAD algorithm has been tested on real and synthetic image data by the author and by Chang \cite{chang2006characterization}, and shows promising results. \\
 
-The causality of the ACAD algorithm is beneficial for hardware implementation, as it enables real-time anomaly detection. ACAD builds a binary anomaly map. It is then possible to send the binary anomaly map instead of transmitting $\delta^{ACAD}(\textbf{x}_{k})$. This is advantageous with regards to data transmission, as this lowers transmission time. Transmission cost is  \\
+The causality of the ACAD algorithm is beneficial for hardware implementation, as it enables real-time anomaly detection. ACAD builds a binary anomaly map. It is then possible to send the binary anomaly map instead of transmitting $\delta^{ACAD}(\textbf{x}_{k})$. This is advantageous with regards to data transmission, as this lowers transmission time.  \\
 
-The main bottleneck of the processing pipeline in the ACAD is the inverse computation. 
+The proposed implementation is made to be scalable in order to handle varying values of spectral bands, $P\_bands$. To be able to read and write two rows of a $P\_bands$ $\times$ $P\_bands$ sized matrix per clock cycle, a parallel memory structure consisting of BRAM-arrays of size $P\_bands$ for storage of matrices utilized by the ACAD algorithm is made. 
+ Zynq-Z7030 and Zynq-7035 contains enough BRAMs to store matrices of size 53 $\times$ 53 and 100 $\times$ 100, respectively. \\
+
+The main bottleneck of the processing pipeline in the ACAD is the inverse computation. The estimated worst case execution time for the inverse computation is 3$P\_bands$ + 2$\sum_{i=0}^{P\_bands-1}i$. 
+\\
+
 
 \section{Future work}
+Completing the ACAD anomaly detector. The \textbf{dACAD} should be implemented, as well as \textbf{FSM ACAD}. When the ACAD anomaly detector is completed, it should be tested on a Zedboard Zynq Evaluation and Development kit.\\
+
+Verification of the design must be done. As of now the only form of verification done has been constrained random input simulation on the blocks \textbf{Shiftregister}, \textbf{ACAD correlation} and \textbf{ACAD inverse}. The designs should be further simulated for a wider range of inputs. An automatic test-setup should be made, with a golden reference model, possibly by using MATLAB or other high-level tools or languages. \\
+
+Make the \textbf{Shiftregister} able to handle $P\_bands$ that does not satisfy the condition $modulo(P\_bands,4)$=0. 
 
 \subsection{Optimizations}
 
 
 \\ 
-Completing the ACAD anomaly detector. The \textbf{dACAD} should be implemented, as well as \textbf{FSM ACAD}. When the ACAD anomaly detector is completed, it should be tested on a Zedboard Zynq Evaluation and Development kit.
 
 
 
-Set the value $\tau$ based on experimental results. The experiments should contain real hyperspectral image data from coastal areas with algae that are interesting for the SmallSat project. $\tau$ is important to be able to make a correct anomaly map. \\
+Set the value $\tau$ based on experimental results. The experiments should contain real hyperspectral image data from coastal areas with algae that are interesting for the SmallSat project. $\tau$ is important to be able to make a correct anomaly map. $\tau$ may also be set by some statistical means such as $\mu$\\
 
 Inverse computation; use Matrix Inversion Lemma as proposed by Hsueh in \cite{hsueh_master_thesis}.\\
 
@@ -40,4 +49,5 @@ Power optimization should be done. This is especially important as the ACAD anom
 
 Precision LUT approach must be checked!\\
 
-Verification of the design must be done. As of now the only form of verification done has been constrained random input simulation on the blocks \textbf{Shiftregister}, \textbf{ACAD correlation} and \textbf{ACAD inverse}. The designs should be further simulated for a wider range of inputs. An automatic test-setup should be made, with a golden reference model, possibly by using MATLAB or other high-level tools or languages. The design should also be tested on the Zedboard Evaluation and Development kit. 
+\\
+Edge problem ACAD

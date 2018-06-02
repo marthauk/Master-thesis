@@ -9,12 +9,12 @@ especially mentioned. Results presented in this chapter are gathered from synthe
 
 The designs were synthesized in Vivado. As Zynq-7000 - Z7030/Z7035 was not available for synthesis, the Zedboard Evaluation and Development kit was used for synthesis. This kit contains less logic than the Z7030/Z7035. The kit contains only 220 DSPs. This leads to the the \textbf{ACAD inverse} over-utilizing DSPs when running synthesis for designs with $P\_bands$ $>=$ 20. When over-utilizing DSPs, the logic gets mapped to LUTs instead, as described in \cite{cite:dsp_overutilizing}, and will produce unusable synthesis results. Therefore; the design was synthesized for xc7k160tiffv676-2L, as this device contains 600 DSPs, in addition to having a similar architecture as the Zedboard (has Slice Registers and Slice LUTs, as opposed to CLB Registers and CLB LUTs). \textbf{ACAD correlation} also over-utilizes DSPs for $P\_bands$ >=60 and $Pixel\_data\_width$ = 16. Therefore, \textbf{ACAD correlation} is synthesized for xc7k160tiffv676-2L for $P\_bands$ >= 60 and $Pixel\_data\_width$ = 16.\\
 
-Timing results when synthesizing for xc7k160tiffv676-2L is not considered usable, as the device logic is different to the Zedboard. The Zedboard contains an Artix-7 device, which is a slower device than the Z-7030/Z-7035, which are Kintex-7 devices. Designs that meets timing demands for the Zedboard will therefore also meet timing demands for the Z-7030/Z-7035 devices. In addition to this, the intial test prototype is to be implemented on a Zedboard. As such, it is valuable to see if the design meet timing when running on Zedboard. Therefore, only timing results from synthesis on the Zedboard Evaluation and development kit is presented. 
+Timing results when synthesizing for xc7k160tiffv676-2L is not considered usable, as the device logic is different to the Zedboard. The Zedboard contains an Artix-7 device, which is a slower device than the Z-7030/Z-7035, which are Kintex-7 devices. Designs that meets timing demands for the Zedboard will therefore also most likely meet timing requirements for the Z-7030/Z-7035 devices. In addition to this, the initial test prototype is to be implemented on a Zedboard. As such, it is valuable to see if the design meet timing when running on Zedboard. Therefore, only timing results from synthesis on the Zedboard Evaluation and development kit is presented. 
 
 
 
 \subsection{Shiftregister}
-\textbf{Shiftregister} was synthesized for $P\_bands$=10,20,30,40,50,60,70,80,90,100. Number of synthesized Slice registers and Slice LUTs are shown in Figure \ref{fig:primitives_shiftregister}. 
+\textbf{Shiftregister} was synthesized for $P\_bands$= [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]. Number of synthesized Slice registers and Slice LUTs are shown in Figure \ref{fig:primitives_shiftregister}. 
 
 \begin{figure}[H]
 
@@ -58,8 +58,9 @@ The design was synthesized for $P\_bands$= [10, 20, 30, 40, 50, 60, 70, 80, 90, 
  
  
 
-\subsection{Inverse}
+\subsection{ACAD inverse}
 
+\textbf{ACAD inverse} was synthesized using the three different division-approaches.  Number of BRAMs synthesized for the three approaches are equal, as shown in Figure \ref{fig:brams_inverse}. 
 
 
 \begin{figure}[H]
@@ -155,7 +156,7 @@ To check if the design met timing, the WNS of the synthesized designs was checke
 
 
 \subsubsection{WNS division operator}
-Implementing division by the use of the division operator "/" yielded the timing results presented in Table \ref{tab:division_operator_wns} when synthesizing block \textbf{Last division}, computing the product $C= B*\frac{1}{A}$. Data width for factor $B$ is 32 bit. The design was synthesized for dividend and divisor data width of 32, 8, 6 and 5, with a target clock constraint of 100 MHz. The target device was the Zedboard Zynq Evaluation and Development kit. 
+Implementing division by the use of the division operator "/" yielded the timing results presented in Table \ref{tab:division_operator_wns} when synthesizing block \textbf{Last division}, computing the product $C= B*\frac{1}{A}$. Width of $B$ is 32 bit. The design was synthesized for dividend and divisor data width of 32, 8, 6 and 5, with a target clock constraint of 100 MHz. The target device was the Zedboard Zynq Evaluation and Development kit. 
 \begin{table}[H]
     \centering
      \resizebox{1.\textwidth}{!}{
@@ -184,6 +185,17 @@ $P\_bands$ =10 was chosen due to the LUT-approach over-utilizing DSP48E1 for hig
  
  \section{Simulation}
 % The designs have been tested on simulation runs in Vivado.  
+\subsection{Shiftregister}
+\textbf{Shiftregister} has been simulated and tested for constrained random inputs of $din$, and for values of $P\_bands$ dividable by 4, satisfying the condition $modulo(P\_bands,4)=0$. Figure \ref{fig:simulation_shiftregister} shows a simulation of $P\_bands$ = 12. 
+
+
+\begin{figure}[H]
+
+\hbox{\hspace*{-2.3cm}                                                           
+   \includegraphics[scale=0.45]{images/simulation_results/shiftregister_p_bands_12.PNG}}
+  \caption{simulation of \textbf{Shiftregister} for $P\_bands$ = 12. } 
+  \label{fig:simulation_shiftregister}
+\end{figure}
  
  \subsection{ACAD correlation}
 

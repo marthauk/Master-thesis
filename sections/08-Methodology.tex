@@ -7,7 +7,7 @@
 %\section{Evaluation of RX, LRX and ACAD }
 %\label{sec:MATLAB_methodology}
 \label{chapter:review_anomaly_detectors}
-To evaluate the performance of the ADs considered in this task, models of the algorithms described in section \ref{sec:anomaly_detectors_theory} were developed in MATLAB, and tested on both hyperspectral image data from the Cuprite site \cite{Cuprite_data} gathered by the AVIRIS imager and synthetic images created by the author. The creation of the synthetic images are described in Section \ref{sec:synthetic_images}.
+To evaluate the performance of the ADs considered in this task, models of the algorithms described in section \ref{sec:anomaly_detectors_theory} were developed in MATLAB, and tested on both hyperspectral image data from the Cuprite site \cite{Cuprite_data} captured by the AVIRIS imager and synthetic images created by the author. The creation of the synthetic images are described in Section \ref{sec:synthetic_images}.
 \\
 
 The MATLAB hyperspectral toolbox \cite{MATLAB_hyperspectral_toolbox} was used for image preprocessing, visualization and for having a good starting point for developing further functionality. The toolbox included an implementation of the RX algorithm. A fork of the toolbox was made, available at \cite{MATLAB_hyperspectral_toolbox_fork}, to be able to do MATLAB implementations of LRX, ALRX and ACAD in order to evaluate the performance of the ADs. The most important scripts and functions from the forked toolbox are also located in appendix \ref{appendice:MATLAB_hyperspectral}.
@@ -17,11 +17,14 @@ The MATLAB hyperspectral toolbox \cite{MATLAB_hyperspectral_toolbox} was used fo
 To make an objective analysis  of the considered ADs performance, synthetic hyperspectral images with known anomalies were created. The images contained anomalies of various sizes, to test the ADs ability to detect variably sized anomalies. A similar test is also done in \cite{global_and_local_rx}. Figure 7(a) in \cite{global_and_local_rx} shows that the RX algorithm was not able to detect anomalies in the third and four column (anomalous pixels made up of >50\% abundance of the anomaly signature). The LRX exhibit slightly better anomaly detection accuracy in this test.
 \\
 
-The purpose of the synthetic images used in this thesis was to get objective metrics of the performance of the evaluated ADs. Two different metrics are important in order to evaluate the performance of the ADs; $false\_anomalies$ and $correctly\_predicted\_anomalies$. These metrics are defined in equation \ref{eq:false_anomalies_metric} and \ref{eq:correctly_predicted_anomalies_metric};
+The purpose of the synthetic images used in this thesis was to provide means for doing objective evaluations of the performance of the considered ADs. Two different metrics are important in order to evaluate the performance of the ADs; $false\_anomalies$ and $correctly\_predicted\_anomalies$. These metrics are defined in equation \ref{eq:false_anomalies_metric} and \ref{eq:correctly_predicted_anomalies_metric};
 \begin{equation}
-    false\_anomalies = predicted\_anomalies - true\_anomalies
+    false\_anomalies = predicted\_anomalies - true\_anomalies,
     \label{eq:false_anomalies_metric}
 \end{equation}
+
+in which $predicted\_anomalies$ is the number of predicted anomalies by the anomaly detector and $true\_anomalies$ are actual anomalies found by the anomaly detector.
+
 
 \begin{equation}
     correctly\_predicted\_anomalies= \frac{predicted\_anomalies\_in\_reference\_map}{reference\_anomalies}
@@ -73,7 +76,7 @@ Synthetic images with different sizes and anomaly sizes were created to evaluate
 
 
 \\
-A third class of synthetic images with a size of $100$ x $614$ pixels was also created, labelled $SimAviris01$. These images has a background consisting of $33\%$ Alunite, $33\%$ Kalonite and $33\%$ Pyrope. The anamalous pixels are pure pixels with a spectral signature of Buddingtonite, extracted from the Cuprite image scene \cite{ground_truth_cuprite}. Six different sized anomalous-target kernels were made, with a size of $1x1$, $2x2$, $5x5$, $10x10$, $15x15$, $20x20$ and $25x25$ pixels. Table \ref{tab:synthetic_images} describes the properties of $SimAviris01$.
+A third class of synthetic images with a size of $100$ x $614$ pixels was also created, labelled $SimAviris01$. These images has a background consisting of $33\%$ Alunite, $33\%$ Kalonite and $33\%$ Pyrope. The anamalous pixels are pure pixels with a spectral signature of Buddingtonite, extracted from the Cuprite mining scene \cite{ground_truth_cuprite}. Six different sized anomalous target kernels were made, with a size of $1x1$, $2x2$, $5x5$, $10x10$, $15x15$, $20x20$ and $25x25$ pixels. Table \ref{tab:synthetic_images} describes the properties of $SimAviris01$.
 
 
 
@@ -137,7 +140,7 @@ Since the RX and LRX AD does not build an anomaly map, the author defines anomal
 \label{fig:hsueh_image_RX_test}
 \end{figure}
 
-The value of $false\_anomalies$ = 0, and  $correctly\_predicted\_anomalies$ = $0.3714$ for this test.
+$false\_anomalies$ = 0, and  $correctly\_predicted\_anomalies$ = $0.3714$ for this test.
 
 \subsubsection{$Sim30\_30AVIRIS$ scene }
 \begin{figure}[H]
@@ -147,7 +150,7 @@ The value of $false\_anomalies$ = 0, and  $correctly\_predicted\_anomalies$ = $0
   \label{fig:rx_sim_aviris_30_30}
 \end{figure}
 
-The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = $1$ for this test.
+ $false\_anomalies$ = 0, and  $correctly\_predicted\_anomalies$ = $1$ for this test.
 
 
 \subsubsection{$Sim\_Aviris01$ scene }
@@ -158,7 +161,7 @@ The value of $false\_anomalies$ = 0, and  $\%correctly\_predicted\_anomalies$ = 
   \label{fig:rx_sim_aviris_01}
 \end{figure}
 
-The value of $false\_anomalies$ = 0, and  $correctly\_predicted\_anomalies$ = $1$ for this test.
+ $false\_anomalies$ = 0, and  $correctly\_predicted\_anomalies$ = $1$ for this test.
 
 \subsection{LRX detection results}
 LRX was tested for kernel size $K$=[5, 10, 15, 20, 23, 25 and 30]. These values were chosen as  \cite{global_and_local_rx} tested LRX and optimized the value $K$ empirically, in the range of $K$ =[3,30]. 
@@ -356,7 +359,7 @@ Figure \ref{fig:cuprite_scene_lrx_result} shows the result of the LRX AD on the 
 \hbox{\hspace*{-1cm}                                                           
 
    \includegraphics[scale=0.5]{images/AD_testing/hyperspectral_images/real_images/K=23_using_gauss_jordan_colormap_jet.png}}
-  \caption{Result from LRX AD with a kernel size of $k$=23 on Cuprite image scene 02. }%Higher score indicates higher probability of the pixel being anomalous. } 
+  \caption{Result from LRX AD with a kernel size of $K$=23 on Cuprite image scene 02. }%Higher score indicates higher probability of the pixel being anomalous. } 
   \label{fig:cuprite_scene_lrx_result}
 \end{figure}
 
@@ -375,7 +378,7 @@ The resulting anomaly map from ACAD AD on the Cuprite scene 02 is shown in Figur
 \hbox{\hspace*{-1.5cm}                                                           
 
    \includegraphics[scale=0.3]{images/AD_testing/anomaly_map_over_picture_tresh=250.png}}
-  \caption{Anomaly map created by ACAD( yellow dots) overlayed over Figure \ref{fig:cuprite_scene_band_220}. } 
+  \caption{Anomaly map created by ACAD (yellow dots) overlayed over Figure \ref{fig:cuprite_scene_band_220}. } 
   \label{fig:cuprite_scene_acad_result}
 \end{figure}
  
@@ -413,19 +416,21 @@ ACAD &Hsueh: &Hsueh: &Figure \ref{fig:cuprite_scene_acad_result} & High. & May p
 \end{table}
  
  
- Other metrics are also important to consider in order to choose the best AD for implementation in HW. The ACAD and the ALRX algorithms is beneficial with regards to data transmission requirements, as they build a binary anomaly map of size $N_{pixels}$ $\times$ $N_{rows}$ which may be transmitted, as opposed to RX and LRX algorithms which produces output results of size  $Pixel\_data\_width$ $\times$ 2 $\times$ $N_{pixels}$ $\times$ $N_{rows}$. If the result from the AD is to be transmitted via radio to the ground station, this will become an important consideration, as the transmission layer is usually the most power-hungry layer in wireless sensor nodes (WSN). One example of this is shown in Figure \ref{fig:transmission_costs} \cite{sachan2012energy}:   \\
+ Other metrics are also important to consider in order to choose the best AD for implementation in HW. The ACAD and the ALRX algorithms is beneficial with regards to data transmission requirements, as they build a binary anomaly map of size $N_{pixels}$ $\times$ $N_{rows}$ which may be transmitted, as opposed to RX and LRX algorithms which produces output results of size  $Pixel\_data\_width$ $\times$ 2 $\times$ $N_{pixels}$ $\times$ $N_{rows}$. If the result from the AD is to be transmitted via radio to a ground station, this will become an important consideration, as the transmission layer is usually the most power-hungry layer in wireless sensor nodes (WSN). One example of this is shown in Figure \ref{fig:transmission_costs} \cite{sachan2012energy}:   \\
  \begin{figure}[H]
 
 
-   \includegraphics[0.7]{images/transmission_wns.png}
+   \includegraphics[0.5]{images/transmission_wns.png}
   \caption{Power consumption in a WSN \cite{sachan2012energy}. } 
   \label{fig:transmission_costs}
 \end{figure}
  
  
- The ACAD algorithm's causality and the use of correlation matrix makes it easier to process in real time than the LRX and GRX algorithms. ACAD can immediately start processing as the first pixel is captured, while RX, utilizing the global covariance or correlation matrix, cannot start processing until the entire image is captured by the hyperspectral imager. LRX needs an image tile of size $k$ $\times$ $k$ before starting.\\
+ The ACAD algorithm's causality and the use of correlation matrix makes it easier to process in real time than the LRX and GRX algorithms. ACAD can immediately start processing as the first pixel is captured, while RX, utilizing the global covariance or correlation matrix, cannot start processing until the entire image is captured by the hyperspectral imager. LRX needs an image tile of size $K$ $\times$ $K$ before starting.\\
  
- \cite{chang2006characterization} concludes that ACAD has advantages over the RX AD in several areas. It can be processed in real time. "It detects various anomalies regardless of whether they are of the same type or distinct types" \cite{chang2006characterization}. The above comparison leads to ACAD being chosen as the choice of AD for implementation. 
+ \cite{chang2006characterization} concludes that ACAD has advantages over the RX AD in several areas. It can be processed in real time. "It detects various anomalies regardless of whether they are of the same type or distinct types" \cite{chang2006characterization}. 
+ The findings in \cite{chang2006characterization} and in the above comparison by the author leads to the ACAD algorithm being chosen as the AD for implementation in hardware. 
+ %The above comparison leads to ACAD being chosen as the choice of AD for implementation. 
  
  
  %as the transmitting of a binary anomaly map will require far less than the transmittion of a $n$-bit anomaly detection result.

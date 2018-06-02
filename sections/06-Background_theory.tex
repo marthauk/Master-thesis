@@ -5,7 +5,7 @@
 
 \section{Hyperspectral imaging}
 \subsection{AVIRIS}
-The Airborne Visible Infrared Imaging Spectrometer(AVIRIS) is a hyperspectral imager launched by NASA. Its main objective is to "identify, measure and monitor constituents of the Earth's surface and atmosphere" \cite{aviris}. 
+The Airborne Visible Infrared Imaging Spectrometer (AVIRIS) is a hyperspectral imager launched by NASA. Its main objective is to "identify, measure and monitor constituents of the Earth's surface and atmosphere" \cite{aviris}. 
 \subsubsection{Cuprite scene}
 Data from the Cuprite mining district \cite{Cuprite_data} captured by the AVIRIS imager is often used as a benchmark scene for different image processing algorithms, including anomaly detection algorithms. Scene 02 from the Cuprite mining can be seen in Figure \ref{fig:cuprite_mining_scene}. 12 different mineral with their respective spectral signature are extracted from the scene \cite{aviris_minerals}. The spectral signatures of the different minerals can be seen in Figure \ref{fig:minerals_Cuprite}. 
 
@@ -17,7 +17,7 @@ Data from the Cuprite mining district \cite{Cuprite_data} captured by the AVIRIS
 \end{figure}
 
 \begin{figure}[H]
-\hbox{\hspace*{-1.8cm}                                              
+\hbox{\hspace*{-1.0cm}                                              
 
    \includegraphics[scale=0.7]{images/AD_testing/endmembers_Cuprite.PNG}}
   \caption{ Spectral signatures of minerals from the Cuprite mining district \cite{aviris_minerals}. } 
@@ -27,7 +27,7 @@ Data from the Cuprite mining district \cite{Cuprite_data} captured by the AVIRIS
 
 \subsection{NTNU Smallsat Project}
 
-The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands, $N_{bands}$, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per row in the image. The number of pixel rows, $N_{rows}$ is 1088. The hyperspectral image cube can be seen in Figure \ref{fig:HSI_image_cube}. Figure \ref{fig:HSI_functionality} displays the functionality of the hyperspectral imager. The imager captures data one pixel at the time, in a row-wise fashion \cite{SmallSat_project_description}.
+The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands, $N_{bands}$, with a sensor resolution of 2048 x 1088 pixels. The number of effective pixels, $N_{pixels}$, is 578. This is the number of effective pixels per row in the image. The number of pixel rows, $N_{rows}$, is 1088. The hyperspectral image cube can be seen in Figure \ref{fig:HSI_image_cube}. Figure \ref{fig:HSI_functionality} displays the functionality of the hyperspectral imager. The imager captures data one pixel at the time, in a row-wise fashion \cite{SmallSat_project_description}.
 
 \textbf{\begin{figure}[H]
 \centering
@@ -39,29 +39,29 @@ The hyperspectral imager used in the NTNU SmallSat project has 100 usable bands,
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.36]{images/hyperspectral_imager.PNG}
-  \caption{ Push-broom hyperspectral imager mode of operation.  } 
+  \caption{ Push-broom hyperspectral imager mode of operation \cite{SmallSat_project_description}.  } 
   \label{fig:HSI_functionality}
 \end{figure}
 
 \section{NTNU Smallsat Project Hardware platform}
-The NTNU Smallsat project onboard processing system is a Zynq-7000 series System-on-Chip (SoC). The SoC can be tiled into two parts; the programmable system and the programmable logic. This is shown in Figure \ref{fig:zynq_7000}. The programmable system consists of a dual core ARM Cortex A9. The programmable logic main processing unit is a Artix-7 or Kintex-7 Series FPGA, depending upon the version of the Zynq-7000 series.
+The NTNU SmallSat project onboard processing system is a Zynq-7000 series System-on-Chip (SoC). The SoC can be divided into two parts; the programmable system and the programmable logic. This is shown in Figure \ref{fig:zynq_7000}. The programmable system consists of a dual core ARM Cortex A9. The programmable logic main processing unit is a Artix-7 or Kintex-7 Series FPGA, depending upon the version of the Zynq-7000 series.
 
 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.3]{images/zynq-mp-core-dual.png}
-  \caption{ Zynq-7000 architecture\cite{cite:zynq_7000}. } 
+  \caption{ Zynq-7000 architecture \cite{cite:zynq_7000}. } 
   \label{fig:zynq_7000}
 \end{figure}
- In NTNU Smallsat Project, an initial prototype will be developed on a Zynq Zedboard Evaluation and Development kit, featuring a Zynq-Z7020. Later stage prototypes will feature Zynq-Z7030 or Z-7035. These are Kintex-7 devices. 
+ In NTNU SmallSat Project, an initial prototype will be developed on a Zynq Zedboard Evaluation and Development kit, featuring a Zynq-Z7020, which contains an Artix-7 device. Later stage prototypes will feature Zynq-Z7030 or Z-7035. These contains Kintex-7 devices. 
 
 \\
-The anomaly detection result will be sent from the satellite to a ground base station. The data budget for packet transmissions are as in page 23 in \cite{SmallSat_project_description}. The size of the AD result must be as small as possible to limit the anomaly detection data packet usage.  
+The anomaly detection result will be transmitted from the satellite to a ground base station. The data budget for packet transmissions are as in page 23 in \cite{SmallSat_project_description}. The size of the AD result must be as small as possible to limit the anomaly detection data packet usage.  
 
 \subsection{AXI-Stream}
 AXI-Stream is a slimmed-down protocol for transfers, without any concept of addresses, where data is moved from one point to another. It is based on the read and write channels in the AXI protoicol. As for AXI buses, handshaking signals (\textbf{TREADY} and \textbf{TVALID}) are used when transferring data. A handshake of data is called a \textit{beat} according to the AXI and AXI-Lite specifications. \\
 
-The NTNU Smallsat utilizes AXI-Lite as the communication protocol between Intellectual Properties (IP). The operating frequency of the AXI-Lite protocol in the NTNU Smallsat project is 100 MHz. 
+The NTNU SmallSat utilizes AXI-Lite as the communication protocol between Intellectual Properties (IP). The operating frequency of the AXI-Lite protocol in the NTNU SmallSat project is 100 MHz. 
 
 
 \section{Anomaly detection}
@@ -78,7 +78,7 @@ The process of detecting anomalies in a hyperspectral image is called anomaly de
 
 The above-mentioned issues are important for the choice of anomaly detection algorithm, and will be further discussed in this chapter.
 \\
-Algorithms used for anomaly detection outputs a scalar for each pixel in an image indicating the probability that the spectral pixel vector is an anomaly. A higher output indicates a higher probability for the pixel vector being an anomaly.
+Algorithms used for anomaly detection outputs a scalar for each pixel in an image indicating the relative probability that the spectral pixel vector is an anomaly. A higher output indicates a higher probability for the pixel vector being an anomaly.
 %\subsection{Background compression}
 % See book
 
@@ -147,19 +147,42 @@ ACAD can then be defined as in equation \ref{eq:ACAD}:
 ACAD is a causal filter, meaning that only the pixels previously processed are used for anomaly detection.  It computes the correlation matrix for the previously captured pixel sample vector {$\textbf{x}_1$, ....$\textbf{x}_k$} up to the pixel currently being processed, $k$, as shown in equation \ref{eq:caus_corr}. This means that ACAD might be implemented in real-time and near-real time, as pixels can be processed as soon as they are captured by the push-broom HSI and the AD does not need to wait for the entire image to be loaded into memory. \\
 
 An anomalous pixel vector have a significant spectral vector difference from its surroundings. Since ACAD is causal, the surroundings is defined as the $n_{acad}$ previously processed pixels. %To evaluate if a spectral vector is anomalous,
-ACAD defines the variable $u_k$, used to evaluate if a pixel vector is anomalous as shown in  equation \ref{eq:u_k}: 
+ACAD defines the variable $u_k$, used to evaluate if a pixel vector is anomalous, as shown in  equation \ref{eq:u_k}: 
 
 \begin{equation}
     u_k = \frac{1}{n_{acad}}\sum_{i-1}^{n_{ACAD}}  \delta^{ACAD}(\textbf{x}_{k-i}).
     \label{eq:u_k}
 \end{equation}
 
- In order to classify if a pixel vector is anomalous or not, the variable $t_k$ is introduced, defined in equation \ref{eq:t_k}. If $t_k$ is greater than a predetermined value $\tau$, the pixel vector is considered an anomaly an added to the set of anomalous targets. If not, it is used in subsequent data processing. 
-
+ In order to classify if a pixel vector is anomalous the variable $t_k$ is introduced, defined in equation \ref{eq:t_k}:
 \begin{equation}
     t_k = \delta^{ACAD}(\textbf{x}_{k}) - u_k.
     \label{eq:t_k}
 \end{equation}
+
+ If $t_k$ is greater than a predetermined value $\tau$, the pixel vector is considered an anomaly an added to the set of anomalous targets. If not, it is used in subsequent data processing. 
+The anomaly map created by ACAD is shown in equation \ref{eq:anomaly_map_ACAD}:
+    
+%\[
+%    f(x)= 
+%\begin{cases}
+%    \frac{x^2-x}{x},& \text{if } x\geq 1\\
+%    0,              & \text{otherwise}
+%\end{cases}
+%\]
+
+\begin{equation}
+    map_{ACAD}(\textbf{x}_{k}) =
+   \left\{
+   \begin{aligned}
+    \Th 1\text{, if } t_k> \tau \\%(\flow_1)
+    % &=  G \\
+     \Th 0\text{, otherwise.}%(\flow_2) &= \ldots
+   \end{aligned}
+   \right.
+   \label{eq:anomaly_map_ACAD}
+\end{equation}
+
 
 
 The four issues labelled Q1, Q2, Q3 and Q4 still remains. For a pixel vector to be considered anomaly it has to be relatively small compared to the size of the image. The relationship between the size of an anomaly and the size of the entire image is $\beta$, shown in equation \ref{eq:beta}:
@@ -169,7 +192,7 @@ The four issues labelled Q1, Q2, Q3 and Q4 still remains. For a pixel vector to 
     \label{eq:beta}
 \end{equation}
 
-According to \cite{chang2006characterization} empirical results show that this ratio will be $\approx$ 100.
+According to \cite{chang2006characterization} empirical results show that $\beta$ will be $\approx$ 100.
 The relationship between $\beta$ and $n_{ACAD}$ is shown in equation \ref{eq:n_acad}:
 \begin{equation}
     n_{ACAD} = \frac{N}{\beta},
@@ -179,12 +202,10 @@ The relationship between $\beta$ and $n_{ACAD}$ is shown in equation \ref{eq:n_a
 where $N$ is the total number of pixels in the image. In  RX and LRX, an earlier detected anomaly with a strong spectral signature may influence the detection of subsequent anomalies, as the anomalies are used for calculation of the correlation or covariance matrix. This is shown in Figure 12 in \cite{chang2006characterization}, where an anomaly with a strong spectral signature influences the RX detector in such a degree that it fails to detect four subsequent anomalous pixels. This problem is solved in ACAD by removing previously detected anomalous pixels from the sample spectral correlation matrix, as shown in equation \ref{eq:caus_corr_anomaly_removed}. 
 \\
 
+
 In \cite{chang2006characterization} noise-immunity tests have been done on different ADs, including RX and ACAD. These tests adds Gaussian noise with a Signal-to-noise ratio of 20:1, 10:1 and 5:1 to a test image. One of the conclusion is that the noise has less effects on ACAD compared to the RX detector as shown in Figure 13 in \cite{chang2006characterization}.
 \\
 
-
-ACAD builds a map of detected anomalies. This map may be used to classify the detected anomalies. One way of classifying anomalies could be by putting detected anomalies in to bins where anomalous pixel vectors with similar spectral signatures are put into the same bin. 
-\\
 %Might also be possible to do some binning?
 %Benefits ACAD: \\
 %- ACAD builds and updates an anomaly library and generates an anomaly map to provide spatial coordinates of all its detected anomalies in the original image. This anomaly map can also be used to classify all the detected anomalies. \\
@@ -219,8 +240,10 @@ ALRX is inspired by the anomaly-map creation and the removal of previously detec
 
 where $\Delta(k_{KxK})$ is the set of previously detected anomalous pixel vectors $\textbf{t}_j$ located within the local window of size $KxK$ with center in the image pixel vector currently being processed, $\textbf{x}$.
 
+% INCLUDE the anomaly map creation and stuff
+
 \section{Inverse matrix}
-The computation of the inverse of a matrix is a part of all the considered ADs. Computing the inverse of a matrix is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization \cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
+The computation of the inverse of a matrix is a part of all the considered ADs. This is a computationally intensive task. There exists multiple algorithms for computing the matrix inverse. One option is to do QR factorization \cite{QRD_fpga}, and compute the inverse of QR. In HW the QR-factorization is most often computed using Givens rotation enabled by a trigonometric algorithm called COrdinate Rotation DIgital Computer (CORDIC) \cite{CORDIC}. \\
 
 Another option is to implement the inverse function by doing Gauss-Jordan elimination \cite{gauss_jordan_fpga}. The Gauss-Jordan elimination is highly parallelizable \cite{gauss_jordan_fpga}. A pseudo-code for computing the Gauss-Jordan elimination is shown in Figure \ref{fig:gauss_jordan_pseudocode}. The Gauss-Jordan elimination can be tiled into three parts; forward elimination, backward elimination and last division, marked by black, red and green square in Figure \ref{fig:gauss_jordan_pseudocode}. 
 \begin{figure}[H]
@@ -242,7 +265,7 @@ There are three different types of row operations performed on the rows of a mat
 \end{enumerate}  
 
 \subsubsection{Forward elimination}
-The first part of Gauss-Jordan elimination reduces the matrix to row echelon form(upper triangular matrix) by using row operations, starting at the topper-most row of the matrix, which is denoted as index zero, and iterating downwards. Two indexes are used, the outer index $i$ and the inner index $j$. This is shown in Figure \ref{fig:forward_elimination_pseudocode}. Forward elimination may use all of the different row operations listed, depending upon the existence of a zero element in the diagonal of the matrix.   
+The first part of Gauss-Jordan elimination reduces the matrix to row echelon form (upper triangular matrix) by using row operations, starting at the topper-most row of the matrix, which is denoted as index zero, and iterating downwards. Two indexes are used, the outer index $i$ and the inner index $j$. This is shown in Figure \ref{fig:forward_elimination_pseudocode}. Forward elimination may use all of the different row operations listed, depending upon the existence of a zero element in the diagonal of the matrix.   
 
 \begin{figure}[H]
 \centering
@@ -264,7 +287,7 @@ Backward elimination utilizes row operation two and three in order to create a d
 
 
 \subsubsection{Last division}
-Last division is the last step of the Gauss-Jordan elimination. The last division starts at the topper-most index of the matrix, denoted index zero, and iterates downwards, shown in Figure \ref{fig:last_division_pseudocode}. It creates the matrix $A^{-1}$ by utilizing the second type of row operations. $A^{-1}$ is the inverse matrix of $A$; $A$ $\times$ $A^{-1}$ = $I$. $I$ is the identity matrix of size $P\_bands$ $\times$ $P\_bands$ containing zero elements, except for the diagonal of the matrix, which contains ones. 
+Last division is the last step of the Gauss-Jordan elimination. The last division starts at the topper-most index of the matrix and iterates downwards, shown in Figure \ref{fig:last_division_pseudocode}. It creates the matrix $A^{-1}$ by utilizing the second type of row operations. $A^{-1}$ is the inverse matrix of $A$; $A$ $\times$ $A^{-1}$ = $I$. $I$ is the identity matrix of size $P\_bands$ $\times$ $P\_bands$ containing zero elements, except for the diagonal of the matrix, which contains ones. 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.5]{images/last_division_pseudocode.png}

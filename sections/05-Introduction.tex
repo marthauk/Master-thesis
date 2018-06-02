@@ -4,19 +4,19 @@
 \label{sec:introduction}
 \section{Motivation}
 
-This master thesis is part of the NTNU SmallSat \cite{SmallSat_project_description} project. The projects mission is to use hyperspectral imaging to observe color in the ocean and the coast of Norway. The payload of the satellite will be a 1/3 U push-broom type hyperspectral imager, dedicated to take images of a $30x50 km^2$ area. In regular Red Green Blue(RGB) imaging each of the image pixels is made up of three frequency components that represent the intensities in red, green and blue frequencies respectively. Such a component is referred to as a band. In hyperspectral imaging (HSI), a pixel will typically consists of hundreds to thousands of bands, providing more information than regular images. This information can be used for a lot of different purposes. It can for example be used to detect different materials in an area, by using spectral signatures of materials as identifiers. Figure \ref{fig:HSI_concept} shows the functional concept of HSI.\\
+This master thesis is part of the NTNU SmallSat \cite{SmallSat_project_description} project. One of the projects mission objectives is to use hyperspectral imaging to observe and collect ocean color data, and to detect and characterize spatial extent of algal blooms. The payload of the satellite will be a 1/3 U push-broom type hyperspectral imager, dedicated to take images of a $30x50 km^2$ area. In regular Red Green Blue (RGB) imaging each of the image pixels is made up of three frequency components that represent the intensities in red, green and blue frequencies respectively. Such a component is referred to as a band. In hyperspectral imaging (HSI), a pixel will typically consists of hundreds to thousands of bands, providing more information than regular images. This information can be used for a lot of different purposes. It can for example be used to detect different materials in an area, by using spectral signatures of materials as identifiers. Figure \ref{fig:HSI_concept} shows the functional concept of HSI.\\
 
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.35]{images/Imaging-Spectroscopy-Concept.png}
-  \caption{ Functional concept of HSI.\cite{HSI_concept} } 
+  \caption{ Functional concept of HSI \cite{HSI_concept}. } 
   \label{fig:HSI_concept}
 \end{figure}
 
 
 \\
 
-NTNU SmallSat aims to use this information to detect algae blooms, phytoplankton, oil spills, microplastic and possibly other irregularities or \textit{anomalies} in the ocean. Detection of harmful algae blooms (HABs) is particularly interesting for the salmon farms located along the coast of Norway, as such blooms can be toxic, even deadly, for the salmon. Algaes were most likely the cause of death for 38 000 salmons in southern Troms in September of 2017 \cite{laksedeath}. An image of such a bloom can be seen in Figure \ref{fig:algae_bloom_troms}. Increasing ocean temperatures as a consequence of global warming may lead to more frequent and intense HABs \cite{climate_change_algae_blooms}. 
+NTNU SmallSat aims to use this information to detect algae blooms, phytoplankton, oil spills, microplastic and possibly other irregularities or \textit{anomalies} in the ocean. Detection of harmful algae blooms (HABs) is particularly interesting for the salmon farms located along the coast of Norway, as such blooms can be toxic, even deadly, for the salmon. Algae were most likely the cause of death for 38 000 salmons in southern Troms in September of 2017 \cite{laksedeath}. An image of such a bloom can be seen in Figure \ref{fig:algae_bloom_troms}. Increasing ocean temperatures as a consequence of global warming may lead to more frequent and intense HABs \cite{climate_change_algae_blooms}. 
 %With the increasing rise in sea temperatures and the issues faced with global warming this is an even 
 % HSI  = hyperspectral imager or imaging?
 \\
@@ -24,7 +24,7 @@ NTNU SmallSat aims to use this information to detect algae blooms, phytoplankton
 \begin{figure}[H]
 \centering
    \includegraphics[scale=0.3]{images/algaes/algaes_northern_troms.jpg}
-  \caption{ Image of an algae bloom along the coast of Troms in Norway \cite{laksedeath}. Foto by NASA EARTH OBSERVATORY. } 
+  \caption{ Image of an algae bloom along the coast of Troms in Norway \cite{laksedeath}.  } 
   \label{fig:algae_bloom_troms}
 \end{figure}
 \\
@@ -50,12 +50,12 @@ Anomaly detection may help combat and monitor the challenges faced globally as a
 \subsection{Master thesis overview}
 The following chapters in this project report delve into the implementation of an Anomaly detector (AD) on a Xilinx Virtex-7 FPGA. The AD is made for the Smallsat project \cite{SmallSat_project_description}. \\  
 
-Chapter \ref{sec:theory} is the Theory section. Algorithms considered used for anomaly detection are described in this chapter. This include the Reed-Xiaoli algorithm, the Local Reed-Xialoi algorithm, the Adaptive Causal algorithm and a proposed AD algorithm by the author, called the Adaptive Local Reed-Xiaoli algorithm. These algorithms computes the inverse of a matrix. Therefore this section also contains theory about inverse computation.\\%Theory about inverse computation is also found in this chapter.   \\
+Chapter \ref{sec:theory} is the Theory section. Algorithms considered used for anomaly detection are described in this chapter. This include the Reed-Xiaoli algorithm, the Local Reed-Xialoi algorithm, the Adaptive Causal algorithm and a proposed AD algorithm by the author, called the Adaptive Local Reed-Xiaoli algorithm. Computing the inverse of a matrix is a part of all the considered ADs. Therefore Chapter \ref{sec:theory} also contains theory about inverse computation.\\%Theory about inverse computation is also found in this chapter.   \\
 
 
-Chapter \ref{chapter:review_anomaly_detectors} contains a review of the considered ADs presented in chapter \ref{sec:theory}. The main object of this review is to decide which of the considered . In this section tests of the different anomaly-detectors has been done in MATLAB on synthetic images and on real image data from the Cuprite scene.\\  
+Chapter \ref{chapter:review_anomaly_detectors} contains a review of the considered ADs presented in chapter \ref{sec:theory}. The main object of this review is to provide means to decide which of the considered ADs is most suited for hardware implementation. In this section tests of the different anomaly detectors has been done in MATLAB on synthetic images and on real image data from the Cuprite scene.\\  
 
-In Chapter \ref{sec:implementation} the hardware implementation of the AD is described. The architecture is presented, along with different design considerations. \\
+In Chapter \ref{sec:implementation} the proposed hardware implementation of the ACAD AD is described. The architecture is presented, along with different design considerations. One of the design considerations is the high number of DSPs inferred for $Pixel\_data\_width$ = 16. The architecture is divided into three parts; \textbf{FSM ACAD}, \text{Shiftregister}, \textbf{ACAD inverse}, \textbf{ACAD correlation} and \textbf{dACAD}. Implementation of these blocks are described in this chapter. \\
 
 Chapter \ref{sec:results} is the Results section. This section contains synthesis results and simulation results.
 \\
